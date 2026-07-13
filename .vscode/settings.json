@@ -1,0 +1,24 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+
+  "[dart]": {
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+      80
+    ]
+  },
+
+  "dart.lineLength": 80,
+  "dart.previewFlutterUiGuides": true,
+
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.eol": "\n",
+
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false
+}
