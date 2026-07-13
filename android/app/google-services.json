@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "796465793361",
+    "project_id": "remindcircle-af485",
+    "storage_bucket": "remindcircle-af485.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:796465793361:android:1849d400fa3dba13f6ab70",
+        "android_client_info": {
+          "package_name": "com.example.remind_circle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4FY6Qb4d1W_FU96tV2C9DhM_Tl0D108Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
