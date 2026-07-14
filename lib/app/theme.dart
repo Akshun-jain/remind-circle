@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remind_circle/app/theme/colors.dart';
 
 class AppTheme {
   const AppTheme._();
@@ -6,13 +7,9 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-
-      colorSchemeSeed: Colors.indigo,
-
+      colorSchemeSeed: AppColors.primary,
+      scaffoldBackgroundColor: AppColors.background,
       brightness: Brightness.light,
-
-      scaffoldBackgroundColor: Colors.white,
-
       appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
     );
   }
