@@ -1,7 +1,11 @@
+import 'package:remind_circle/features/auth/domain/models/app_user.dart';
+
 abstract class AuthRepository {
-  Future<void> signInWithGoogle();
+  Future<AppUser> signInWithGoogle();
 
   Future<void> signOut();
 
-  bool get isLoggedIn;
+  AppUser? getCurrentUser();
+
+  Stream<AppUser?> authStateChanges();
 }

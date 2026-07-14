@@ -1,4 +1,4 @@
-import 'app_user.dart';
+import 'package:remind_circle/features/auth/domain/models/app_user.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
