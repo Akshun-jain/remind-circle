@@ -12,7 +12,20 @@
           "package_name": "com.example.remind_circle"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "796465793361-9os5u2q5m2h8i7ctje033it5dlcgouun.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.remind_circle",
+            "certificate_hash": "211f4f566c155b970ddfef7e09925659c58acd6c"
+          }
+        },
+        {
+          "client_id": "796465793361-6isua2fo8qq19rrhmj7p6esjtqano5i4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC4FY6Qb4d1W_FU96tV2C9DhM_Tl0D108Y"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "796465793361-6isua2fo8qq19rrhmj7p6esjtqano5i4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "796465793361-bo24j8ijnua916r9l4g3f5n4l4gb0adv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.remindCircle"
+              }
+            }
+          ]
         }
       }
     }
