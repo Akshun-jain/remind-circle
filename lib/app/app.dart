@@ -12,6 +12,7 @@ class RemindCircleApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
+      //home: const Scaffold(body: Center(child: Text('RemindCircle'))),
     );
   }
 }

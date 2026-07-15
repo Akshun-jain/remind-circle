@@ -57,22 +57,24 @@ class DefaultFirebaseOptions {
     projectId: 'remindcircle-af485',
     storageBucket: 'remindcircle-af485.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDj0rpKCYuZBtm0dq7pWL9VW1IjDGpds0M',
     appId: '1:796465793361:ios:d88f077cde6ac283f6ab70',
     messagingSenderId: '796465793361',
     projectId: 'remindcircle-af485',
     storageBucket: 'remindcircle-af485.firebasestorage.app',
+    androidClientId: '796465793361-9os5u2q5m2h8i7ctje033it5dlcgouun.apps.googleusercontent.com',
+    iosClientId: '796465793361-bo24j8ijnua916r9l4g3f5n4l4gb0adv.apps.googleusercontent.com',
     iosBundleId: 'com.example.remindCircle',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyDj0rpKCYuZBtm0dq7pWL9VW1IjDGpds0M',
     appId: '1:796465793361:ios:d88f077cde6ac283f6ab70',
     messagingSenderId: '796465793361',
     projectId: 'remindcircle-af485',
     storageBucket: 'remindcircle-af485.firebasestorage.app',
+    androidClientId: '796465793361-9os5u2q5m2h8i7ctje033it5dlcgouun.apps.googleusercontent.com',
+    iosClientId: '796465793361-bo24j8ijnua916r9l4g3f5n4l4gb0adv.apps.googleusercontent.com',
     iosBundleId: 'com.example.remindCircle',
   );
 

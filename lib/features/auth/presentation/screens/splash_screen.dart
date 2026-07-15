@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:remind_circle/app/theme/colors.dart';
 import 'package:remind_circle/app/theme/spacing.dart';
 import 'package:remind_circle/app/theme/text_styles.dart';
+import 'package:remind_circle/core/constants/app_strings.dart';
 import 'package:remind_circle/features/auth/presentation/screens/welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -43,10 +44,10 @@ class _SplashScreenState extends State<SplashScreen> {
                   height: 150,
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                const Text('RemindCircle', style: AppTextStyles.heading),
+                const Text(AppStrings.appName, style: AppTextStyles.heading),
                 const SizedBox(height: AppSpacing.sm),
                 const Text(
-                  'Never Miss Moments Together',
+                  AppStrings.tagline,
                   style: AppTextStyles.body,
                   textAlign: TextAlign.center,
                 ),
