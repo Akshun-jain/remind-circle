@@ -1,17 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:remind_circle/core/services/firebase_auth_service.dart';
 import 'package:remind_circle/core/services/google_auth_service.dart';
 import 'package:remind_circle/features/auth/data/repositories/auth_repository.dart';
 import 'package:remind_circle/features/auth/domain/models/app_user.dart';
 
 class FirebaseAuthRepository implements AuthRepository {
-  FirebaseAuthRepository(this._firebaseAuthService, this._googleAuthService);
+  FirebaseAuthRepository(this._firebaseService, this._googleService);
 
-  final FirebaseAuthService _firebaseAuthService;
-  final GoogleAuthService _googleAuthService;
+  final FirebaseAuthService _firebaseService;
+  final GoogleAuthService _googleService;
 
   @override
   Future<AppUser> signInWithGoogle() async {
-    final credential = await _googleAuthService.signIn();
+    final credential = await _googleService.signIn();
 
     final user = credential.user!;
 
@@ -25,12 +26,12 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await _googleAuthService.signOut();
+    await _googleService.signOut();
   }
 
   @override
   AppUser? getCurrentUser() {
-    final user = _firebaseAuthService.currentUser;
+    final User? user = _firebaseService.currentUser;
 
     if (user == null) return null;
 
@@ -44,7 +45,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Stream<AppUser?> authStateChanges() {
-    return _firebaseAuthService.authStateChanges().map((user) {
+    return _firebaseService.authStateChanges().map((user) {
       if (user == null) return null;
 
       return AppUser(
