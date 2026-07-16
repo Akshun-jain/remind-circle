@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:remind_circle/core/providers/auth_repository_provider.dart';
+import 'package:remind_circle/features/user/data/providers/user_profile_service_provider.dart';
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(
   AuthController.new,
@@ -13,9 +14,13 @@ class AuthController extends AsyncNotifier<void> {
     state = const AsyncLoading();
 
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(authRepositoryProvider);
+      final authRepository = ref.read(authRepositoryProvider);
 
-      await repository.signInWithGoogle();
+      await authRepository.signInWithGoogle();
+
+      final userProfileService = ref.read(userProfileServiceProvider);
+
+      await userProfileService.syncCurrentUser();
     });
   }
 }
