@@ -8,4 +8,6 @@ abstract class GroupRepository {
   Future<Group?> getGroupByInviteCode(String inviteCode);
 
   Future<void> deleteGroup(String groupId);
+
+  Future<void> joinGroup({required String inviteCode, required String userId});
 }

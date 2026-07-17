@@ -5,6 +5,7 @@ class Group {
     required this.ownerId,
     required this.inviteCode,
     required this.createdAt,
+    required this.memberIds,
   });
 
   final String id;
@@ -12,6 +13,7 @@ class Group {
   final String ownerId;
   final String inviteCode;
   final DateTime createdAt;
+  final List<String> memberIds;
 
   Map<String, dynamic> toMap() {
     return {
@@ -19,6 +21,7 @@ class Group {
       'ownerId': ownerId,
       'inviteCode': inviteCode,
       'createdAt': createdAt,
+      'memberIds': memberIds,
     };
   }
 
@@ -29,6 +32,7 @@ class Group {
       ownerId: map['ownerId'] as String,
       inviteCode: map['inviteCode'] as String,
       createdAt: (map['createdAt'] as dynamic).toDate(),
+      memberIds: List<String>.from(map['memberIds'] ?? []),
     );
   }
 }

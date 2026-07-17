@@ -28,4 +28,22 @@ class GroupController extends AsyncNotifier<Group?> {
 
     return group.requireValue;
   }
+
+  Future<void> joinGroup({
+    required String inviteCode,
+    required String userId,
+  }) async {
+    state = const AsyncLoading();
+
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(groupRepositoryProvider);
+
+      await repository.joinGroup(
+        inviteCode: inviteCode,
+        userId: userId,
+      );
+
+      return null;
+    });
+  }
 }

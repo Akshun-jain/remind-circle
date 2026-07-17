@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remind_circle/core/services/firestore_service.dart';
 import 'package:remind_circle/features/groups/data/repositories/group_repository.dart';
 import 'package:remind_circle/features/groups/domain/models/group.dart';
@@ -31,6 +32,7 @@ class FirestoreGroupRepository implements GroupRepository {
       id: doc.id,
       name: name,
       ownerId: ownerId,
+      memberIds: [ownerId],
       inviteCode: _generateInviteCode(),
       createdAt: DateTime.now(),
     );
@@ -61,6 +63,26 @@ class FirestoreGroupRepository implements GroupRepository {
     final doc = snapshot.docs.first;
 
     return Group.fromMap(doc.id, doc.data());
+  }
+
+  @override
+  Future<void> joinGroup({
+    required String inviteCode,
+    required String userId,
+  }) async {
+    final group = await getGroupByInviteCode(inviteCode);
+
+    if (group == null) {
+      throw Exception('Group not found.');
+    }
+
+    if (group.memberIds.contains(userId)) {
+      return;
+    }
+
+    await _firestoreService.groups.doc(group.id).update({
+      'memberIds': FieldValue.arrayUnion([userId]),
+    });
   }
 
   @override
