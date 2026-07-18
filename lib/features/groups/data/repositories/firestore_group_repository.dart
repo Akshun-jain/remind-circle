@@ -35,6 +35,7 @@ class FirestoreGroupRepository implements GroupRepository {
       memberIds: [ownerId],
       inviteCode: _generateInviteCode(),
       createdAt: DateTime.now(),
+      admins: [],
     );
 
     await doc.set(group.toMap());
