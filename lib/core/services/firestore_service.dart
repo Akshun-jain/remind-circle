@@ -10,4 +10,7 @@ class FirestoreService {
 
   CollectionReference<Map<String, dynamic>> get groups =>
       _firestore.collection('groups');
+
+  CollectionReference<Map<String, dynamic>> get events =>
+      _firestore.collection('events');
 }

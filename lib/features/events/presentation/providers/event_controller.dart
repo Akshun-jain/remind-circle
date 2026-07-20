@@ -20,4 +20,24 @@ class EventController extends AsyncNotifier<void> {
       await repository.createEvent(event);
     });
   }
+
+  Future<void> updateEvent(Event event) async {
+    state = const AsyncLoading();
+
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(eventRepositoryProvider);
+
+      await repository.updateEvent(event);
+    });
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    state = const AsyncLoading();
+
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(eventRepositoryProvider);
+
+      await repository.deleteEvent(eventId);
+    });
+  }
 }

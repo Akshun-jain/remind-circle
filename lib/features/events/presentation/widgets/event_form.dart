@@ -3,11 +3,13 @@ import 'package:remind_circle/core/constants/event_constants.dart';
 import 'package:remind_circle/features/events/domain/enums/event_type.dart';
 import 'package:remind_circle/features/events/domain/enums/repeat_type.dart';
 import 'package:remind_circle/features/events/presentation/models/event_form_data.dart';
+import 'package:remind_circle/features/events/domain/models/event.dart';
 
 class EventForm extends StatefulWidget {
+  final Event? initialEvent;
   final void Function(EventFormData data) onSubmit;
 
-  const EventForm({super.key, required this.onSubmit});
+  const EventForm({super.key, this.initialEvent, required this.onSubmit});
 
   @override
   State<EventForm> createState() => _EventFormState();
@@ -26,6 +28,29 @@ class _EventFormState extends State<EventForm> {
   final _notesController = TextEditingController();
 
   final Set<int> _notifyBefore = {0};
+
+  @override
+  void initState() {
+    super.initState();
+
+    final event = widget.initialEvent;
+
+    if (event == null) return;
+
+    _eventType = event.eventType;
+    _repeatType = event.repeatType;
+    _eventDate = event.eventDate;
+
+    _personController.text = event.personName ?? '';
+    if (_requiresCustomTitle) {
+      _titleController.text = event.title;
+    }
+    _notesController.text = event.notes ?? '';
+
+    _notifyBefore
+      ..clear()
+      ..addAll(event.notifyBefore);
+  }
 
   @override
   void dispose() {
@@ -228,19 +253,6 @@ class _EventFormState extends State<EventForm> {
     );
   }
 
-  String _labelForRepeatType(RepeatType repeat) {
-    switch (repeat) {
-      case RepeatType.none:
-        return 'Does not repeat';
-
-      case RepeatType.monthly:
-        return 'Every Month';
-
-      case RepeatType.yearly:
-        return 'Every Year';
-    }
-  }
-
   Widget _buildReminderChips() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,24 +290,29 @@ class _EventFormState extends State<EventForm> {
     switch (type) {
       case EventType.birthday:
         return 'Birthday';
-
       case EventType.anniversary:
         return 'Anniversary';
-
       case EventType.workAnniversary:
         return 'Work Anniversary';
-
       case EventType.meeting:
         return 'Meeting';
-
       case EventType.festival:
         return 'Festival';
-
       case EventType.holiday:
         return 'Holiday';
-
       case EventType.custom:
         return 'Custom';
+    }
+  }
+
+  String _labelForRepeatType(RepeatType repeat) {
+    switch (repeat) {
+      case RepeatType.none:
+        return 'Does not repeat';
+      case RepeatType.monthly:
+        return 'Every Month';
+      case RepeatType.yearly:
+        return 'Every Year';
     }
   }
 }

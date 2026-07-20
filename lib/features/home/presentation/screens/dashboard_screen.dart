@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:remind_circle/features/groups/presentation/screens/create_group_screen.dart';
@@ -6,12 +5,16 @@ import 'package:remind_circle/features/home/presentation/providers/my_groups_pro
 
 import 'package:remind_circle/features/groups/presentation/screens/join_group_screen.dart';
 
+import 'package:remind_circle/features/groups/presentation/screens/group_details_screen.dart';
+
+import 'package:remind_circle/core/providers/auth_provider.dart';
+
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = FirebaseAuth.instance.currentUser!;
+    final user = ref.watch(currentUserProvider)!;
     final groups = ref.watch(myGroupsProvider);
 
     return Scaffold(
@@ -98,6 +101,16 @@ class DashboardScreen extends ConsumerWidget {
                             ),
                             title: Text(group.name),
                             subtitle: Text('Invite Code: ${group.inviteCode}'),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      GroupDetailsScreen(group: group),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },

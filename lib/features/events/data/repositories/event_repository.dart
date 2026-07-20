@@ -3,9 +3,9 @@ import 'package:remind_circle/features/events/domain/models/event.dart';
 abstract class EventRepository {
   Future<void> createEvent(Event event);
 
-  Stream<List<Event>> getEvents(String groupId);
+  Stream<List<Event>> watchGroupEvents(String groupId);
 
-  Future<void> deleteEvent(String eventId, String groupId);
+  Future<void> updateEvent(Event event);
 
-  Future<void> toggleEvent(String eventId, String groupId, bool completed);
+  Future<void> deleteEvent(String eventId);
 }

@@ -77,4 +77,36 @@ class Event {
       'isActive': isActive,
     };
   }
+
+  Event copyWith({
+    String? id,
+    String? groupId,
+    String? title,
+    String? personName,
+    EventType? eventType,
+    DateTime? eventDate,
+    RepeatType? repeatType,
+    List<int>? notifyBefore,
+    String? notes,
+    String? createdBy,
+    String? createdByName,
+    DateTime? createdAt,
+    bool? isActive,
+  }) {
+    return Event(
+      id: id ?? this.id,
+      groupId: groupId ?? this.groupId,
+      title: title ?? this.title,
+      personName: personName ?? this.personName,
+      eventType: eventType ?? this.eventType,
+      eventDate: eventDate ?? this.eventDate,
+      repeatType: repeatType ?? this.repeatType,
+      notifyBefore: notifyBefore ?? this.notifyBefore,
+      notes: notes ?? this.notes,
+      createdBy: createdBy ?? this.createdBy,
+      createdByName: createdByName ?? this.createdByName,
+      createdAt: createdAt ?? this.createdAt,
+      isActive: isActive ?? this.isActive,
+    );
+  }
 }
