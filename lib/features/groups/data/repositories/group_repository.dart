@@ -10,4 +10,9 @@ abstract class GroupRepository {
   Future<void> deleteGroup(String groupId);
 
   Future<void> joinGroup({required String inviteCode, required String userId});
+
+  Future<void> promoteToAdmin({
+    required String groupId,
+    required String userId,
+  });
 }

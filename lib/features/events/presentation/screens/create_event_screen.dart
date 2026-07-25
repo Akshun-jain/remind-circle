@@ -74,7 +74,7 @@ class CreateEventScreen extends ConsumerWidget {
 
                 await ref
                     .read(eventControllerProvider.notifier)
-                    .deleteEvent(initialEvent!.id);
+                    .deleteEvent(initialEvent!);
 
                 if (context.mounted) {
                   Navigator.pop(context);
@@ -99,6 +99,8 @@ class CreateEventScreen extends ConsumerWidget {
                     ? (data.personName ?? '')
                     : (data.title ?? data.eventType.name);
 
+                //debugPrint('Form eventTime: ${data.eventTime}');
+
                 final event = initialEvent == null
                     ? Event(
                         id: '',
@@ -107,6 +109,7 @@ class CreateEventScreen extends ConsumerWidget {
                         personName: data.personName,
                         eventType: data.eventType,
                         eventDate: data.eventDate,
+                        eventTime: data.eventTime,
                         repeatType: data.repeatType,
                         notifyBefore: data.notifyBefore,
                         notes: data.notes,
@@ -121,6 +124,7 @@ class CreateEventScreen extends ConsumerWidget {
                         personName: data.personName,
                         eventType: data.eventType,
                         eventDate: data.eventDate,
+                        eventTime: data.eventTime,
                         repeatType: data.repeatType,
                         notifyBefore: data.notifyBefore,
                         notes: data.notes,
@@ -131,7 +135,10 @@ class CreateEventScreen extends ConsumerWidget {
                 if (initialEvent == null) {
                   await controller.createEvent(event);
                 } else {
-                  await controller.updateEvent(event);
+                  await controller.updateEvent(
+                    oldEvent: initialEvent!,
+                    newEvent: event,
+                  );
                 }
               },
             ),

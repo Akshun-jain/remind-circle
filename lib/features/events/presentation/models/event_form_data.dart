@@ -6,6 +6,7 @@ class EventFormData {
   final String? personName;
   final String? title;
   final DateTime eventDate;
+  final DateTime? eventTime;
   final RepeatType repeatType;
   final List<int> notifyBefore;
   final String? notes;
@@ -15,6 +16,7 @@ class EventFormData {
     this.personName,
     this.title,
     required this.eventDate,
+    this.eventTime,
     required this.repeatType,
     required this.notifyBefore,
     this.notes,

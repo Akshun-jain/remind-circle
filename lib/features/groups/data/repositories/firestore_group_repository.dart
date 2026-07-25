@@ -87,6 +87,16 @@ class FirestoreGroupRepository implements GroupRepository {
   }
 
   @override
+  Future<void> promoteToAdmin({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _firestoreService.groups.doc(groupId).update({
+      'admins': FieldValue.arrayUnion([userId]),
+    });
+  }
+
+  @override
   Future<void> deleteGroup(String groupId) async {
     await _firestoreService.groups.doc(groupId).delete();
   }

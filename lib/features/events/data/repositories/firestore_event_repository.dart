@@ -8,26 +8,29 @@ class FirestoreEventRepository implements EventRepository {
   FirestoreEventRepository(this._firestoreService);
 
   @override
-  Future<void> createEvent(Event event) async {
+  Future<Event> createEvent(Event event) async {
     final doc = _firestoreService.events.doc();
 
-    await doc.set(
-      Event(
-        id: doc.id,
-        groupId: event.groupId,
-        title: event.title,
-        personName: event.personName,
-        eventType: event.eventType,
-        eventDate: event.eventDate,
-        repeatType: event.repeatType,
-        notifyBefore: event.notifyBefore,
-        notes: event.notes,
-        createdBy: event.createdBy,
-        createdByName: event.createdByName,
-        createdAt: event.createdAt,
-        isActive: event.isActive,
-      ).toMap(),
+    final savedEvent = Event(
+      id: doc.id,
+      groupId: event.groupId,
+      title: event.title,
+      personName: event.personName,
+      eventType: event.eventType,
+      eventDate: event.eventDate,
+      eventTime: event.eventTime,
+      repeatType: event.repeatType,
+      notifyBefore: event.notifyBefore,
+      notes: event.notes,
+      createdBy: event.createdBy,
+      createdByName: event.createdByName,
+      createdAt: event.createdAt,
+      isActive: event.isActive,
     );
+
+    await doc.set(savedEvent.toMap());
+
+    return savedEvent;
   }
 
   @override
@@ -51,5 +54,16 @@ class FirestoreEventRepository implements EventRepository {
   @override
   Future<void> deleteEvent(String eventId) async {
     await _firestoreService.events.doc(eventId).delete();
+  }
+
+  @override
+  Future<List<Event>> getAllActiveEvents() async {
+    final snapshot = await _firestoreService.events
+        .where('isActive', isEqualTo: true)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => Event.fromMap(doc.id, doc.data()))
+        .toList();
   }
 }

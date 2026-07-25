@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:remind_circle/features/events/domain/enums/event_type.dart';
 import 'package:remind_circle/features/events/domain/enums/repeat_type.dart';
 import 'package:remind_circle/features/events/domain/models/event.dart';
+import 'package:remind_circle/core/services/countdown_service.dart';
 
 class EventCard extends StatelessWidget {
   const EventCard({super.key, this.onTap, required this.event});
@@ -14,7 +15,7 @@ class EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final countdown = CountdownService.getCountdownLabel(event);
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -26,79 +27,103 @@ class EventCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                Row(
-              children: [
-                CircleAvatar(
-                  child: Text(
-                    _emoji(event.eventType),
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _eventTypeName(event.eventType),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      Text(event.title, style: theme.textTheme.bodyLarge),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 18),
-
-            Row(
-              children: [
-                const Icon(Icons.calendar_month, size: 18),
-
-                const SizedBox(width: 8),
-
-                Text(DateFormat('EEEE, d MMMM yyyy').format(event.eventDate)),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Chip(
-                  avatar: const Icon(Icons.repeat, size: 18),
-                  label: Text(_repeatLabel(event.repeatType)),
-                ),
-
-                ...event.notifyBefore.map(
-                  (days) => Chip(
-                    avatar: const Icon(Icons.notifications, size: 18),
-                    label: Text(
-                      days == 0
-                          ? 'Same Day'
-                          : '$days Day${days > 1 ? 's' : ''}',
+              Row(
+                children: [
+                  CircleAvatar(
+                    child: Text(
+                      _emoji(event.eventType),
+                      style: const TextStyle(fontSize: 20),
                     ),
                   ),
-                ),
+
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _eventTypeName(event.eventType),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        Text(event.title, style: theme.textTheme.bodyLarge),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 18),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_month, size: 18),
+
+                      const SizedBox(width: 8),
+
+                      Text(
+                        DateFormat('EEEE, d MMMM yyyy').format(event.eventDate),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Row(
+                    children: [
+                      const Icon(Icons.schedule, size: 18),
+
+                      const SizedBox(width: 8),
+
+                      Text(
+                        countdown,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  Chip(
+                    avatar: const Icon(Icons.repeat, size: 18),
+                    label: Text(_repeatLabel(event.repeatType)),
+                  ),
+
+                  ...event.notifyBefore.map(
+                    (days) => Chip(
+                      avatar: const Icon(Icons.notifications, size: 18),
+                      label: Text(
+                        days == 0
+                            ? 'Same Day'
+                            : '$days Day${days > 1 ? 's' : ''}',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              if (event.notes != null && event.notes!.trim().isNotEmpty) ...[
+                const SizedBox(height: 12),
+
+                Text(event.notes!, style: theme.textTheme.bodyMedium),
               ],
-            ),
-
-            if (event.notes != null && event.notes!.trim().isNotEmpty) ...[
-              const SizedBox(height: 12),
-
-              Text(event.notes!, style: theme.textTheme.bodyMedium),
             ],
-          ],
+          ),
         ),
-      ),
       ),
     );
   }

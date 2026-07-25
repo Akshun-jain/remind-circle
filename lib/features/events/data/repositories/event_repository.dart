@@ -1,7 +1,9 @@
 import 'package:remind_circle/features/events/domain/models/event.dart';
 
 abstract class EventRepository {
-  Future<void> createEvent(Event event);
+  Future<Event> createEvent(Event event);
+
+  Future<List<Event>> getAllActiveEvents();
 
   Stream<List<Event>> watchGroupEvents(String groupId);
 

@@ -14,6 +14,11 @@ class Event {
 
   final DateTime eventDate;
 
+  /// Time of the event.
+  /// If null, this is treated as an all-day event and notifications
+  /// will default to 9:00 AM.
+  final DateTime? eventTime;
+
   final RepeatType repeatType;
 
   final List<int> notifyBefore;
@@ -34,6 +39,7 @@ class Event {
     this.personName,
     required this.eventType,
     required this.eventDate,
+    this.eventTime,
     required this.repeatType,
     required this.notifyBefore,
     this.notes,
@@ -51,6 +57,9 @@ class Event {
       personName: map['personName'] as String?,
       eventType: EventType.values.byName(map['eventType'] as String),
       eventDate: (map['eventDate'] as Timestamp).toDate(),
+      eventTime: map['eventTime'] != null
+          ? (map['eventTime'] as Timestamp).toDate()
+          : null,
       repeatType: RepeatType.values.byName(map['repeatType'] as String),
       notifyBefore: List<int>.from(map['notifyBefore'] as List),
       notes: map['notes'] as String?,
@@ -68,6 +77,7 @@ class Event {
       'personName': personName,
       'eventType': eventType.name,
       'eventDate': eventDate,
+      'eventTime': eventTime,
       'repeatType': repeatType.name,
       'notifyBefore': notifyBefore,
       'notes': notes,
@@ -85,6 +95,7 @@ class Event {
     String? personName,
     EventType? eventType,
     DateTime? eventDate,
+    DateTime? eventTime,
     RepeatType? repeatType,
     List<int>? notifyBefore,
     String? notes,
@@ -100,6 +111,7 @@ class Event {
       personName: personName ?? this.personName,
       eventType: eventType ?? this.eventType,
       eventDate: eventDate ?? this.eventDate,
+      eventTime: eventTime ?? this.eventTime,
       repeatType: repeatType ?? this.repeatType,
       notifyBefore: notifyBefore ?? this.notifyBefore,
       notes: notes ?? this.notes,

@@ -8,6 +8,7 @@ import 'package:remind_circle/features/groups/presentation/screens/join_group_sc
 import 'package:remind_circle/features/groups/presentation/screens/group_details_screen.dart';
 
 import 'package:remind_circle/core/providers/auth_provider.dart';
+import 'package:remind_circle/features/auth/presentation/providers/auth_controller.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -18,7 +19,43 @@ class DashboardScreen extends ConsumerWidget {
     final groups = ref.watch(myGroupsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('RemindCircle')),
+      appBar: AppBar(
+        title: const Text('RemindCircle'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value != 'signOut') return;
+
+              final shouldSignOut = await showDialog<bool>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Sign Out'),
+                    content: const Text('Are you sure you want to sign out?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Sign Out'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (shouldSignOut != true) return;
+
+              await ref.read(authControllerProvider.notifier).signOut();
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'signOut', child: Text('Sign Out')),
+            ],
+          ),
+        ],
+      ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

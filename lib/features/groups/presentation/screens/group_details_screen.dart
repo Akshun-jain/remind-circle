@@ -9,6 +9,11 @@ import 'package:remind_circle/features/events/presentation/providers/group_event
 
 import 'package:remind_circle/features/events/presentation/widgets/event_card.dart';
 
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
+
+import 'package:remind_circle/features/groups/presentation/screens/group_members_screen.dart';
+
 class GroupDetailsScreen extends ConsumerWidget {
   const GroupDetailsScreen({super.key, required this.group});
 
@@ -50,19 +55,34 @@ class GroupDetailsScreen extends ConsumerWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Column(
-                            children: [
-                              const Icon(Icons.people),
-                              const SizedBox(height: 6),
-                              Text(
-                                '${group.memberIds.length}',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      GroupMembersScreen(group: group),
                                 ),
-                              ),
-                              const Text('Members'),
-                            ],
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                const Icon(Icons.people),
+
+                                const SizedBox(height: 6),
+
+                                Text(
+                                  '${group.memberIds.length}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                const Text('Members'),
+                              ],
+                            ),
                           ),
                         ),
 
@@ -94,24 +114,72 @@ class GroupDetailsScreen extends ConsumerWidget {
                     const Divider(height: 32),
 
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Icon(Icons.key),
 
                         const SizedBox(width: 12),
 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Invite Code',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Invite Code',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
 
-                            Text(
-                              group.inviteCode,
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                          ],
+                              const SizedBox(height: 4),
+
+                              Text(
+                                group.inviteCode,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  letterSpacing: 1.2,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              Row(
+                                children: [
+                                  OutlinedButton.icon(
+                                    icon: const Icon(Icons.copy),
+                                    label: const Text('Copy'),
+                                    onPressed: () async {
+                                      await Clipboard.setData(
+                                        ClipboardData(text: group.inviteCode),
+                                      );
+
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Invite code copied'),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+
+                                  const SizedBox(width: 12),
+
+                                  OutlinedButton.icon(
+                                    icon: const Icon(Icons.share),
+                                    label: const Text('Share'),
+                                    onPressed: () {
+                                      Share.share(
+                                        'Join my RemindCircle group!\n\n'
+                                        'Invite Code: ${group.inviteCode}',
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

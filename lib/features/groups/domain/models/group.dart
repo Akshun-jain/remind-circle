@@ -39,4 +39,16 @@ class Group {
       admins: List<String>.from(map['admins'] ?? []),
     );
   }
+
+  bool isOwner(String uid) {
+    return ownerId == uid;
+  }
+
+  bool isAdmin(String uid) {
+    return admins.contains(uid);
+  }
+
+  bool isMember(String uid) {
+    return memberIds.contains(uid);
+  }
 }

@@ -22,6 +22,7 @@ class _EventFormState extends State<EventForm> {
   RepeatType _repeatType = RepeatType.yearly;
 
   DateTime _eventDate = DateTime.now();
+  DateTime? _eventTime;
 
   final _personController = TextEditingController();
   final _titleController = TextEditingController();
@@ -35,11 +36,30 @@ class _EventFormState extends State<EventForm> {
 
     final event = widget.initialEvent;
 
-    if (event == null) return;
+    if (event == null) {
+      _eventTime = DateTime(
+        _eventDate.year,
+        _eventDate.month,
+        _eventDate.day,
+        9,
+        0,
+      );
+      return;
+    }
 
     _eventType = event.eventType;
     _repeatType = event.repeatType;
     _eventDate = event.eventDate;
+
+    _eventTime =
+        event.eventTime ??
+        DateTime(
+          event.eventDate.year,
+          event.eventDate.month,
+          event.eventDate.day,
+          9,
+          0,
+        );
 
     _personController.text = event.personName ?? '';
     if (_requiresCustomTitle) {
@@ -75,6 +95,7 @@ class _EventFormState extends State<EventForm> {
             ? null
             : _titleController.text.trim(),
         eventDate: _eventDate,
+        eventTime: _eventTime,
         repeatType: _repeatType,
         notifyBefore: _notifyBefore.toList()..sort(),
         notes: _notesController.text.trim().isEmpty
@@ -98,39 +119,48 @@ class _EventFormState extends State<EventForm> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildEventTypeDropdown(),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildEventTypeDropdown(),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          if (_requiresPersonName) _buildPersonNameField(),
+            if (_requiresPersonName) _buildPersonNameField(),
 
-          if (_requiresPersonName) const SizedBox(height: 16),
+            if (_requiresPersonName) const SizedBox(height: 16),
 
-          if (_requiresCustomTitle) _buildTitleField(),
+            if (_requiresCustomTitle) _buildTitleField(),
 
-          if (_requiresCustomTitle) const SizedBox(height: 16),
+            if (_requiresCustomTitle) const SizedBox(height: 16),
 
-          _buildDatePicker(),
+            _buildDatePicker(),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          _buildRepeatDropdown(),
+            _buildTimePicker(),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          _buildReminderChips(),
+            _buildRepeatDropdown(),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          _buildNotesField(),
+            _buildReminderChips(),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-          FilledButton(onPressed: _submit, child: const Text('Save Event')),
-        ],
+            _buildNotesField(),
+
+            const SizedBox(height: 24),
+
+            FilledButton(onPressed: _submit, child: const Text('Save Event')),
+          ],
+        ),
       ),
     );
   }
@@ -224,6 +254,54 @@ class _EventFormState extends State<EventForm> {
         if (picked != null) {
           setState(() {
             _eventDate = picked;
+
+            _eventTime = DateTime(
+              picked.year,
+              picked.month,
+              picked.day,
+              _eventTime?.hour ?? 9,
+              _eventTime?.minute ?? 0,
+            );
+          });
+        }
+      },
+    );
+  }
+
+  Widget _buildTimePicker() {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Colors.grey),
+      ),
+      leading: const Icon(Icons.access_time),
+      title: const Text('Event Time'),
+      subtitle: Text(
+        _eventTime == null
+            ? 'Not set'
+            : TimeOfDay.fromDateTime(_eventTime!).format(context),
+      ),
+      onTap: () async {
+        final initial = TimeOfDay.fromDateTime(
+          _eventTime ??
+              DateTime(_eventDate.year, _eventDate.month, _eventDate.day, 9, 0),
+        );
+
+        final picked = await showTimePicker(
+          context: context,
+          initialTime: initial,
+        );
+
+        if (picked != null) {
+          setState(() {
+            _eventTime = DateTime(
+              _eventDate.year,
+              _eventDate.month,
+              _eventDate.day,
+              picked.hour,
+              picked.minute,
+            );
           });
         }
       },
