@@ -28,19 +28,16 @@ class MemberTile extends StatelessWidget {
         roleIcon = Icons.workspace_premium;
         roleLabel = 'Owner';
         roleColor = Colors.orange;
-        break;
 
       case GroupRole.admin:
         roleIcon = Icons.shield;
         roleLabel = 'Admin';
         roleColor = Colors.blue;
-        break;
 
       case GroupRole.member:
         roleIcon = Icons.person;
         roleLabel = 'Member';
         roleColor = Colors.grey;
-        break;
     }
 
     return Card(
@@ -55,7 +52,6 @@ class MemberTile extends StatelessWidget {
               ? Text(user.name.characters.first)
               : null,
         ),
-
         title: Row(
           children: [
             Expanded(
@@ -64,7 +60,6 @@ class MemberTile extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
-
             if (isCurrentUser)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -79,15 +74,29 @@ class MemberTile extends StatelessWidget {
               ),
           ],
         ),
-
-        subtitle: Row(
-          children: [
-            Icon(roleIcon, size: 16, color: roleColor),
-
-            const SizedBox(width: 4),
-
-            Text(roleLabel),
-          ],
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Row(
+            children: [
+              Icon(roleIcon, size: 16, color: roleColor),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: roleColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  roleLabel,
+                  style: TextStyle(
+                    color: roleColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         trailing: trailing,
       ),

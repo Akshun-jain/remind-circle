@@ -75,10 +75,6 @@ class CreateEventScreen extends ConsumerWidget {
                 await ref
                     .read(eventControllerProvider.notifier)
                     .deleteEvent(initialEvent!);
-
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
               },
             ),
         ],
@@ -125,6 +121,7 @@ class CreateEventScreen extends ConsumerWidget {
                         eventType: data.eventType,
                         eventDate: data.eventDate,
                         eventTime: data.eventTime,
+                        clearEventTime: data.eventTime == null,
                         repeatType: data.repeatType,
                         notifyBefore: data.notifyBefore,
                         notes: data.notes,

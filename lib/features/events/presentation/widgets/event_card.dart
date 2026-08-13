@@ -7,10 +7,16 @@ import 'package:remind_circle/features/events/domain/models/event.dart';
 import 'package:remind_circle/core/services/countdown_service.dart';
 
 class EventCard extends StatelessWidget {
-  const EventCard({super.key, this.onTap, required this.event});
+  const EventCard({
+    super.key,
+    required this.event,
+    this.onTap,
+    this.onMenuSelected,
+  });
 
   final Event event;
   final VoidCallback? onTap;
+  final ValueChanged<String>? onMenuSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +59,15 @@ class EventCard extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                  if (onMenuSelected != null)
+                    PopupMenuButton<String>(
+                      onSelected: onMenuSelected,
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(value: 'edit', child: Text('Edit')),
+                        PopupMenuItem(value: 'delete', child: Text('Delete')),
+                      ],
+                    ),
                 ],
               ),
 

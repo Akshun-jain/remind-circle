@@ -9,7 +9,7 @@ class FirestoreEventRepository implements EventRepository {
 
   @override
   Future<Event> createEvent(Event event) async {
-    final doc = _firestoreService.events.doc();
+    final doc = _firestoreService.groupEvents(event.groupId).doc();
 
     final savedEvent = Event(
       id: doc.id,
@@ -35,8 +35,8 @@ class FirestoreEventRepository implements EventRepository {
 
   @override
   Stream<List<Event>> watchGroupEvents(String groupId) {
-    return _firestoreService.events
-        .where('groupId', isEqualTo: groupId)
+    return _firestoreService
+        .groupEvents(groupId)
         .orderBy('eventDate')
         .snapshots()
         .map(
@@ -48,22 +48,17 @@ class FirestoreEventRepository implements EventRepository {
 
   @override
   Future<void> updateEvent(Event event) async {
-    await _firestoreService.events.doc(event.id).update(event.toMap());
+    await _firestoreService
+        .groupEvents(event.groupId)
+        .doc(event.id)
+        .update(event.toMap());
   }
 
   @override
-  Future<void> deleteEvent(String eventId) async {
-    await _firestoreService.events.doc(eventId).delete();
-  }
-
-  @override
-  Future<List<Event>> getAllActiveEvents() async {
-    final snapshot = await _firestoreService.events
-        .where('isActive', isEqualTo: true)
-        .get();
-
-    return snapshot.docs
-        .map((doc) => Event.fromMap(doc.id, doc.data()))
-        .toList();
+  Future<void> deleteEvent({
+    required String groupId,
+    required String eventId,
+  }) async {
+    await _firestoreService.groupEvents(groupId).doc(eventId).delete();
   }
 }

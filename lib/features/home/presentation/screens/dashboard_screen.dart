@@ -5,10 +5,15 @@ import 'package:remind_circle/features/home/presentation/providers/my_groups_pro
 
 import 'package:remind_circle/features/groups/presentation/screens/join_group_screen.dart';
 
-import 'package:remind_circle/features/groups/presentation/screens/group_details_screen.dart';
+//import 'package:remind_circle/features/groups/presentation/screens/group_details_screen.dart';
 
 import 'package:remind_circle/core/providers/auth_provider.dart';
 import 'package:remind_circle/features/auth/presentation/providers/auth_controller.dart';
+
+import 'package:remind_circle/features/home/presentation/widgets/greeting_section.dart';
+import 'package:remind_circle/features/home/presentation/widgets/groups_section.dart';
+
+import 'package:remind_circle/features/home/presentation/widgets/upcoming_events_section.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -88,72 +93,23 @@ class DashboardScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         child: groups.when(
           data: (list) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hi, ${user.displayName ?? "User"} 👋',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GreetingSection(user: user),
 
-                const SizedBox(height: 8),
+                  const SizedBox(height: 32),
 
-                Text(
-                  user.email ?? '',
-                  style: const TextStyle(color: Colors.grey),
-                ),
+                  const UpcomingEventsSection(),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-                const Text(
-                  'Your Groups',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
+                  GroupsSection(groups: list),
 
-                const SizedBox(height: 16),
-
-                if (list.isEmpty)
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        'No groups yet.\nTap + to create one.',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: list.length,
-                      itemBuilder: (_, index) {
-                        final group = list[index];
-
-                        return Card(
-                          child: ListTile(
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.groups),
-                            ),
-                            title: Text(group.name),
-                            subtitle: Text('Invite Code: ${group.inviteCode}'),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      GroupDetailsScreen(group: group),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-              ],
+                  const SizedBox(height: 100),
+                ],
+              ),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),

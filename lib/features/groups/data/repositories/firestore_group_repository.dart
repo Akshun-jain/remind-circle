@@ -1,9 +1,12 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:flutter/foundation.dart';
 import 'package:remind_circle/core/services/firestore_service.dart';
 import 'package:remind_circle/features/groups/data/repositories/group_repository.dart';
 import 'package:remind_circle/features/groups/domain/models/group.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FirestoreGroupRepository implements GroupRepository {
   FirestoreGroupRepository(this._firestoreService);
@@ -35,10 +38,18 @@ class FirestoreGroupRepository implements GroupRepository {
       memberIds: [ownerId],
       inviteCode: _generateInviteCode(),
       createdAt: DateTime.now(),
-      admins: [],
+      admins: [ownerId],
     );
 
-    await doc.set(group.toMap());
+    final batch = FirebaseFirestore.instance.batch();
+
+    batch.set(doc, group.toMap());
+
+    final inviteCodeDoc = _firestoreService.inviteCodes.doc(group.inviteCode);
+
+    batch.set(inviteCodeDoc, {'groupId': group.id});
+
+    await batch.commit();
 
     return group;
   }
@@ -71,18 +82,38 @@ class FirestoreGroupRepository implements GroupRepository {
     required String inviteCode,
     required String userId,
   }) async {
-    final group = await getGroupByInviteCode(inviteCode);
+    final inviteCodeDoc = await _firestoreService.inviteCodes
+        .doc(inviteCode)
+        .get(const GetOptions(source: Source.server));
 
-    if (group == null) {
+    if (!inviteCodeDoc.exists) {
       throw Exception('Group not found.');
     }
 
-    if (group.memberIds.contains(userId)) {
-      return;
+    final data = inviteCodeDoc.data();
+
+    if (data == null) {
+      throw Exception('Group not found.');
     }
 
-    await _firestoreService.groups.doc(group.id).update({
-      'memberIds': FieldValue.arrayUnion([userId]),
+    final groupId = data['groupId'] as String?;
+
+    if (groupId == null) {
+      throw Exception('Invalid invite code.');
+    }
+
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      throw Exception('You must be signed in.');
+    }
+
+    if (currentUser.uid != userId) {
+      throw Exception('Authentication mismatch.');
+    }
+
+    await _firestoreService.groups.doc(groupId).update({
+      'memberIds': FieldValue.arrayUnion([currentUser.uid]),
     });
   }
 
@@ -98,6 +129,61 @@ class FirestoreGroupRepository implements GroupRepository {
 
   @override
   Future<void> deleteGroup(String groupId) async {
-    await _firestoreService.groups.doc(groupId).delete();
+    final groupEvents = _firestoreService.groupEvents(groupId);
+
+    final snapshot = await groupEvents.get();
+
+    final batch = FirebaseFirestore.instance.batch();
+
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    batch.delete(_firestoreService.groups.doc(groupId));
+
+    await batch.commit();
+  }
+
+  @override
+  Stream<Group?> watchGroup(String groupId) {
+    return _firestoreService.groups.doc(groupId).snapshots().map((doc) {
+      if (!doc.exists) {
+        return null;
+      }
+
+      return Group.fromMap(doc.id, doc.data() as Map<String, dynamic>);
+    });
+  }
+
+  @override
+  Future<void> demoteAdmin({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _firestoreService.groups.doc(groupId).update({
+      'admins': FieldValue.arrayRemove([userId]),
+    });
+  }
+
+  @override
+  Future<void> removeMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _firestoreService.groups.doc(groupId).update({
+      'memberIds': FieldValue.arrayRemove([userId]),
+      'admins': FieldValue.arrayRemove([userId]),
+    });
+  }
+
+  @override
+  Future<void> leaveGroup({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _firestoreService.groups.doc(groupId).update({
+      'memberIds': FieldValue.arrayRemove([userId]),
+      'admins': FieldValue.arrayRemove([userId]),
+    });
   }
 }

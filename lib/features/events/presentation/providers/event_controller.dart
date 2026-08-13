@@ -4,6 +4,9 @@ import 'package:remind_circle/core/providers/event_repository_provider.dart';
 import 'package:remind_circle/features/events/domain/models/event.dart';
 
 import 'package:remind_circle/core/notifications/notification_service.dart';
+import 'package:remind_circle/features/home/presentation/providers/upcoming_events_provider.dart';
+
+//import 'package:remind_circle/features/home/presentation/providers/upcoming_events_provider.dart';
 
 final eventControllerProvider = AsyncNotifierProvider<EventController, void>(
   EventController.new,
@@ -22,7 +25,13 @@ class EventController extends AsyncNotifier<void> {
       final savedEvent = await repository.createEvent(event);
 
       await NotificationService.instance.scheduleEventNotifications(savedEvent);
+
+      ref.invalidate(upcomingEventsProvider);
     });
+
+    if (!state.hasError) {
+      ref.invalidate(upcomingEventsProvider);
+    }
   }
 
   Future<void> updateEvent({
@@ -34,15 +43,18 @@ class EventController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       final repository = ref.read(eventRepositoryProvider);
 
-      // Cancel notifications scheduled for the old event
       await NotificationService.instance.cancelEventNotifications(oldEvent.id);
 
-      // Save the updated event
       await repository.updateEvent(newEvent);
 
-      // Schedule notifications for the updated event
       await NotificationService.instance.scheduleEventNotifications(newEvent);
+
+      ref.invalidate(upcomingEventsProvider);
     });
+
+    if (!state.hasError) {
+      ref.invalidate(upcomingEventsProvider);
+    }
   }
 
   Future<void> deleteEvent(Event event) async {
@@ -53,7 +65,13 @@ class EventController extends AsyncNotifier<void> {
 
       await NotificationService.instance.cancelEventNotifications(event.id);
 
-      await repository.deleteEvent(event.id);
+      await repository.deleteEvent(groupId: event.groupId, eventId: event.id);
+
+      ref.invalidate(upcomingEventsProvider);
     });
+
+    if (!state.hasError) {
+      ref.invalidate(upcomingEventsProvider);
+    }
   }
 }

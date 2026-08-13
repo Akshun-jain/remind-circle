@@ -5,6 +5,8 @@ abstract class GroupRepository {
 
   Future<Group?> getGroup(String groupId);
 
+  Stream<Group?> watchGroup(String groupId);
+
   Future<Group?> getGroupByInviteCode(String inviteCode);
 
   Future<void> deleteGroup(String groupId);
@@ -15,4 +17,10 @@ abstract class GroupRepository {
     required String groupId,
     required String userId,
   });
+
+  Future<void> demoteAdmin({required String groupId, required String userId});
+
+  Future<void> removeMember({required String groupId, required String userId});
+
+  Future<void> leaveGroup({required String groupId, required String userId});
 }

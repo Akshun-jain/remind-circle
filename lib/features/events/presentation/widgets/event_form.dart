@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:remind_circle/core/constants/event_constants.dart';
 import 'package:remind_circle/features/events/domain/enums/event_type.dart';
 import 'package:remind_circle/features/events/domain/enums/repeat_type.dart';
-import 'package:remind_circle/features/events/presentation/models/event_form_data.dart';
+import 'package:remind_circle/features/events/presentation/form_models/event_form_data.dart';
 import 'package:remind_circle/features/events/domain/models/event.dart';
 
 class EventForm extends StatefulWidget {
@@ -22,6 +22,7 @@ class _EventFormState extends State<EventForm> {
   RepeatType _repeatType = RepeatType.yearly;
 
   DateTime _eventDate = DateTime.now();
+  bool _isAllDay = false;
   DateTime? _eventTime;
 
   final _personController = TextEditingController();
@@ -50,6 +51,8 @@ class _EventFormState extends State<EventForm> {
     _eventType = event.eventType;
     _repeatType = event.repeatType;
     _eventDate = event.eventDate;
+
+    _isAllDay = event.eventTime == null;
 
     _eventTime =
         event.eventTime ??
@@ -112,7 +115,7 @@ class _EventFormState extends State<EventForm> {
   }
 
   bool get _requiresCustomTitle {
-    return _eventType == EventType.custom;
+    return _eventType == EventType.custom || _eventType == EventType.meeting;
   }
 
   @override
@@ -143,6 +146,10 @@ class _EventFormState extends State<EventForm> {
             const SizedBox(height: 16),
 
             _buildTimePicker(),
+
+            const SizedBox(height: 8),
+
+            _buildAllDayCheckbox(),
 
             const SizedBox(height: 16),
 
@@ -255,13 +262,15 @@ class _EventFormState extends State<EventForm> {
           setState(() {
             _eventDate = picked;
 
-            _eventTime = DateTime(
-              picked.year,
-              picked.month,
-              picked.day,
-              _eventTime?.hour ?? 9,
-              _eventTime?.minute ?? 0,
-            );
+            if (!_isAllDay) {
+              _eventTime = DateTime(
+                picked.year,
+                picked.month,
+                picked.day,
+                _eventTime?.hour ?? 9,
+                _eventTime?.minute ?? 0,
+              );
+            }
           });
         }
       },
@@ -278,32 +287,71 @@ class _EventFormState extends State<EventForm> {
       leading: const Icon(Icons.access_time),
       title: const Text('Event Time'),
       subtitle: Text(
-        _eventTime == null
+        _isAllDay
+            ? 'All day'
+            : _eventTime == null
             ? 'Not set'
             : TimeOfDay.fromDateTime(_eventTime!).format(context),
       ),
-      onTap: () async {
-        final initial = TimeOfDay.fromDateTime(
-          _eventTime ??
-              DateTime(_eventDate.year, _eventDate.month, _eventDate.day, 9, 0),
-        );
 
-        final picked = await showTimePicker(
-          context: context,
-          initialTime: initial,
-        );
+      // 👇 THIS goes here
+      onTap: _isAllDay
+          ? null
+          : () async {
+              final initial = TimeOfDay.fromDateTime(
+                _eventTime ??
+                    DateTime(
+                      _eventDate.year,
+                      _eventDate.month,
+                      _eventDate.day,
+                      9,
+                      0,
+                    ),
+              );
 
-        if (picked != null) {
-          setState(() {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: initial,
+              );
+
+              if (picked != null) {
+                setState(() {
+                  _eventTime = DateTime(
+                    _eventDate.year,
+                    _eventDate.month,
+                    _eventDate.day,
+                    picked.hour,
+                    picked.minute,
+                  );
+                });
+              }
+            },
+    );
+  }
+
+  Widget _buildAllDayCheckbox() {
+    return CheckboxListTile(
+      contentPadding: EdgeInsets.zero,
+      title: const Text('All-day event'),
+      value: _isAllDay,
+      onChanged: (value) {
+        if (value == null) return;
+
+        setState(() {
+          _isAllDay = value;
+
+          if (_isAllDay) {
+            _eventTime = null;
+          } else {
             _eventTime = DateTime(
               _eventDate.year,
               _eventDate.month,
               _eventDate.day,
-              picked.hour,
-              picked.minute,
+              9,
+              0,
             );
-          });
-        }
+          }
+        });
       },
     );
   }
@@ -352,7 +400,7 @@ class _EventFormState extends State<EventForm> {
                 setState(() {
                   if (selected) {
                     _notifyBefore.add(days);
-                  } else {
+                  } else if (_notifyBefore.length > 1) {
                     _notifyBefore.remove(days);
                   }
                 });

@@ -6,7 +6,7 @@ import 'package:remind_circle/features/events/domain/models/event.dart';
 //import 'package:intl/intl.dart';
 import 'package:remind_circle/core/services/recurrence_service.dart';
 import 'package:remind_circle/core/constants/event_constants.dart';
-import 'package:remind_circle/features/events/data/repositories/event_repository.dart';
+//import 'package:remind_circle/features/events/data/repositories/event_repository.dart';
 //import 'package:remind_circle/features/events/domain/models/event.dart';
 import 'package:flutter/foundation.dart';
 
@@ -29,7 +29,7 @@ class NotificationService {
       timezone = 'Asia/Kolkata';
     }
     //print('Local timezone: $timezone');
-    tz.setLocalLocation(tz.getLocation(timezone));
+    //tz.setLocalLocation(tz.getLocation(timezone));
 
     tz.setLocalLocation(tz.getLocation(timezone));
 
@@ -91,17 +91,28 @@ class NotificationService {
   }
 
   Future<void> debugPendingNotifications() async {
-    //final pending = await _notifications.pendingNotificationRequests();
+    final pending = await _notifications.pendingNotificationRequests();
 
-    //print('Pending notifications: ${pending.length}');
+    debugPrint('PENDING NOTIFICATIONS - Count: ${pending.length}');
 
-    //for (final n in pending) {
-    // print('ID: ${n.id}, Title: ${n.title}, Body: ${n.body}');
-    //}
+    for (final notification in pending) {
+      debugPrint(
+        'PENDING NOTIFICATION - '
+        'ID: ${notification.id}, '
+        'Title: ${notification.title}, '
+        'Payload: ${notification.payload}',
+      );
+    }
   }
 
   int _notificationId(String eventId, int daysBefore) {
-    return eventId.hashCode + daysBefore;
+    var hash = 0;
+
+    for (final codeUnit in eventId.codeUnits) {
+      hash = ((hash * 31) + codeUnit) & 0x7fffffff;
+    }
+
+    return (hash * 31 + daysBefore) & 0x7fffffff;
   }
 
   String _notificationTitle(Event event, int daysBefore) {
@@ -137,9 +148,13 @@ class NotificationService {
   }
 
   Future<void> scheduleEventNotifications(Event event) async {
-    if (event.eventTime == null) return;
-
     final nextOccurrence = RecurrenceService.getNextOccurrence(event);
+
+    debugPrint('NOTIFICATION DEBUG - Event ID: ${event.id}');
+    debugPrint('NOTIFICATION DEBUG - Event time: ${event.eventTime}');
+    debugPrint('NOTIFICATION DEBUG - Now: ${DateTime.now()}');
+    debugPrint('NOTIFICATION DEBUG - Next occurrence: $nextOccurrence');
+    debugPrint('NOTIFICATION DEBUG - Reminders: ${event.notifyBefore}');
 
     if (nextOccurrence == null) {
       return;
@@ -187,9 +202,11 @@ class NotificationService {
     }
   }
 
-  Future<void> rescheduleAllNotifications(EventRepository repository) async {
-    final events = await repository.getAllActiveEvents();
+  Future<void> cancelAllNotifications() async {
+    await _notifications.cancelAll();
+  }
 
+  Future<void> rescheduleAllNotifications(List<Event> events) async {
     for (final event in events) {
       await cancelEventNotifications(event.id);
       await scheduleEventNotifications(event);

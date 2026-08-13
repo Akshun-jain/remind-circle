@@ -5,11 +5,17 @@ class RecurrenceService {
   const RecurrenceService._();
 
   static DateTime? getNextOccurrence(Event event) {
-    final eventTime = event.eventTime;
-
-    if (eventTime == null) return null;
-
     final now = DateTime.now();
+
+    final eventTime =
+        event.eventTime ??
+        DateTime(
+          event.eventDate.year,
+          event.eventDate.month,
+          event.eventDate.day,
+          9,
+          0,
+        );
 
     switch (event.repeatType) {
       case RepeatType.none:
