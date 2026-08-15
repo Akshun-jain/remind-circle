@@ -50,7 +50,7 @@ Future<void> main() async {
 
   //await NotificationService.instance.scheduleTestNotification();
 
-  //await NotificationService.instance.debugPendingNotifications();
+  await NotificationService.instance.debugPendingNotifications();
 
   runApp(const ProviderScope(child: RemindCircleApp()));
 }

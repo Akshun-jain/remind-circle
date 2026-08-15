@@ -170,6 +170,8 @@ class NotificationService {
 
     const details = NotificationDetails(android: androidDetails);
 
+    await cancelEventNotifications(event.id);
+
     for (final daysBefore in event.notifyBefore) {
       final notificationTime = tz.TZDateTime.from(
         nextOccurrence,

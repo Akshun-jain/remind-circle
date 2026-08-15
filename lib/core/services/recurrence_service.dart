@@ -33,6 +33,14 @@ class RecurrenceService {
     var year = now.year;
     var month = now.month;
 
+    // If the original event month is still in the future
+    // in the current year, start from the original month.
+    if (eventTime.year > now.year ||
+        (eventTime.year == now.year && eventTime.month > now.month)) {
+      year = eventTime.year;
+      month = eventTime.month;
+    }
+
     while (true) {
       final lastDay = DateTime(year, month + 1, 0).day;
 
