@@ -26,7 +26,7 @@ class EventController extends AsyncNotifier<void> {
 
       await NotificationService.instance.scheduleEventNotifications(savedEvent);
 
-      ref.invalidate(upcomingEventsProvider);
+      //ref.invalidate(upcomingEventsProvider);
     });
 
     if (!state.hasError) {
@@ -43,13 +43,9 @@ class EventController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       final repository = ref.read(eventRepositoryProvider);
 
-      await NotificationService.instance.cancelEventNotifications(oldEvent.id);
-
       await repository.updateEvent(newEvent);
 
       await NotificationService.instance.scheduleEventNotifications(newEvent);
-
-      ref.invalidate(upcomingEventsProvider);
     });
 
     if (!state.hasError) {
@@ -63,9 +59,9 @@ class EventController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       final repository = ref.read(eventRepositoryProvider);
 
-      await NotificationService.instance.cancelEventNotifications(event.id);
-
       await repository.deleteEvent(groupId: event.groupId, eventId: event.id);
+
+      await NotificationService.instance.cancelEventNotifications(event.id);
 
       ref.invalidate(upcomingEventsProvider);
     });

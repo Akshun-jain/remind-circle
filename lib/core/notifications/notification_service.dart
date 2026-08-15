@@ -148,6 +148,8 @@ class NotificationService {
   }
 
   Future<void> scheduleEventNotifications(Event event) async {
+    await cancelEventNotifications(event.id);
+
     final nextOccurrence = RecurrenceService.getNextOccurrence(event);
 
     debugPrint('NOTIFICATION DEBUG - Event ID: ${event.id}');
@@ -169,8 +171,6 @@ class NotificationService {
     );
 
     const details = NotificationDetails(android: androidDetails);
-
-    await cancelEventNotifications(event.id);
 
     for (final daysBefore in event.notifyBefore) {
       final notificationTime = tz.TZDateTime.from(
@@ -210,7 +210,7 @@ class NotificationService {
 
   Future<void> rescheduleAllNotifications(List<Event> events) async {
     for (final event in events) {
-      await cancelEventNotifications(event.id);
+      //await cancelEventNotifications(event.id);
       await scheduleEventNotifications(event);
     }
   }
