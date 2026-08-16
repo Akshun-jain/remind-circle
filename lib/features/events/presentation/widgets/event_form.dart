@@ -428,6 +428,9 @@ class _EventFormState extends State<EventForm> {
         return 'Holiday';
       case EventType.custom:
         return 'Custom';
+
+      case EventType.other:
+        return 'Other';
     }
   }
 

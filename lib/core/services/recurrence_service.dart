@@ -4,8 +4,8 @@ import 'package:remind_circle/features/events/domain/models/event.dart';
 class RecurrenceService {
   const RecurrenceService._();
 
-  static DateTime? getNextOccurrence(Event event) {
-    final now = DateTime.now();
+  static DateTime? getNextOccurrence(Event event, {DateTime? now}) {
+    now ??= DateTime.now();
 
     final eventTime =
         event.eventTime ??

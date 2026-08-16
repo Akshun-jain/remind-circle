@@ -18,6 +18,8 @@ import 'package:remind_circle/features/groups/presentation/providers/group_contr
 import 'package:remind_circle/features/events/presentation/providers/event_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:remind_circle/features/events/presentation/screens/event_details_screen.dart';
+
 class GroupDetailsScreen extends ConsumerWidget {
   const GroupDetailsScreen({super.key, required this.group});
 
@@ -429,19 +431,18 @@ class GroupDetailsScreen extends ConsumerWidget {
 
                           return EventCard(
                             event: event,
-                            onTap: canManageEvent
-                                ? () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => CreateEventScreen(
-                                          group: group,
-                                          initialEvent: event,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                : null,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => EventDetailsScreen(
+                                    event: event,
+                                    group: group,
+                                    canManageEvent: canManageEvent,
+                                  ),
+                                ),
+                              );
+                            },
                             onMenuSelected: canManageEvent
                                 ? (action) async {
                                     switch (action) {

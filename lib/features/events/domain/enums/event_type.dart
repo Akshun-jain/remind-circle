@@ -5,5 +5,5 @@ enum EventType {
   meeting,
   festival,
   holiday,
-  custom,
+  custom, other,
 }

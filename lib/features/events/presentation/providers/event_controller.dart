@@ -62,8 +62,6 @@ class EventController extends AsyncNotifier<void> {
       await repository.deleteEvent(groupId: event.groupId, eventId: event.id);
 
       await NotificationService.instance.cancelEventNotifications(event.id);
-
-      ref.invalidate(upcomingEventsProvider);
     });
 
     if (!state.hasError) {

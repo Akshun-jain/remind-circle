@@ -28,10 +28,6 @@ class CreateEventScreen extends ConsumerWidget {
           context,
         ).showSnackBar(SnackBar(content: Text(next.error.toString())));
       }
-
-      if (!next.isLoading && previous?.isLoading == true && !next.hasError) {
-        Navigator.pop(context);
-      }
     });
 
     final controller = ref.watch(eventControllerProvider);
@@ -136,6 +132,14 @@ class CreateEventScreen extends ConsumerWidget {
                     oldEvent: initialEvent!,
                     newEvent: event,
                   );
+                }
+
+                if (!context.mounted) return;
+
+                final state = ref.read(eventControllerProvider);
+
+                if (!state.hasError) {
+                  Navigator.pop(context, event);
                 }
               },
             ),

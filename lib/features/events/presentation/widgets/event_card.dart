@@ -165,6 +165,9 @@ class EventCard extends StatelessWidget {
 
       case EventType.custom:
         return '📌';
+
+      case EventType.other:
+        return '📅';
     }
   }
 
@@ -190,6 +193,9 @@ class EventCard extends StatelessWidget {
 
       case EventType.custom:
         return 'Custom';
+
+      case EventType.other:
+        return 'Other';
     }
   }
 
