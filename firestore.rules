@@ -1,0 +1,219 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(groupId) {
+      return get(
+        /databases/$(database)/documents/groups/$(groupId)
+      ).data.ownerId == request.auth.uid;
+    }
+
+    function isAdmin(groupId) {
+      return get(
+        /databases/$(database)/documents/groups/$(groupId)
+      ).data.admins.hasAny([request.auth.uid]);
+    }
+
+    function isMember(groupId) {
+      return get(
+        /databases/$(database)/documents/groups/$(groupId)
+      ).data.memberIds.hasAny([request.auth.uid]);
+    }
+
+    function isLeavingGroup() {
+      return signedIn() &&
+             resource.data.ownerId != request.auth.uid &&
+             resource.data.memberIds.hasAny([request.auth.uid]) &&
+             !request.resource.data.memberIds.hasAny([request.auth.uid]) &&
+             resource.data.memberIds.hasAll(
+               request.resource.data.memberIds
+             ) &&
+             request.resource.data.memberIds.size() ==
+               resource.data.memberIds.size() - 1 &&
+             resource.data.admins.hasAll(
+               request.resource.data.admins
+             ) &&
+             request.resource.data.admins.size() ==
+               resource.data.admins.size() -
+               (resource.data.admins.hasAny([request.auth.uid]) ? 1 : 0) &&
+             !request.resource.data.admins.hasAny([request.auth.uid]) &&
+             resource.data.diff(request.resource.data)
+               .affectedKeys()
+               .hasOnly([
+                 'memberIds',
+                 'admins'
+               ]);
+    }
+
+
+    // -------------------------
+    // Users
+    // -------------------------
+
+    match /users/{userId} {
+
+  allow create: if signedIn() &&
+                request.auth.uid == userId;
+
+  allow read: if signedIn() &&
+                request.auth.uid == userId;
+
+  allow update: if signedIn() &&
+                request.auth.uid == userId;
+
+  allow delete: if false;
+}
+
+
+    // -------------------------
+    // Invite Codes
+    // -------------------------
+
+    match /inviteCodes/{inviteCode} {
+
+      allow read: if signedIn();
+
+      allow create: if signedIn();
+
+      allow update, delete: if false;
+    }
+
+
+    // -------------------------
+    // Groups
+    // -------------------------
+
+    match /groups/{groupId} {
+
+      // Members can read their groups.
+      allow read: if signedIn() &&
+                  resource.data.memberIds.hasAny([
+                    request.auth.uid
+                  ]);
+
+      // A new group must be created by its owner.
+      allow create: if signedIn() &&
+                    request.resource.data.ownerId ==
+                      request.auth.uid &&
+                    request.resource.data.memberIds.hasAny([
+                      request.auth.uid
+                    ]) &&
+                    request.resource.data.admins.hasAny([
+                      request.auth.uid
+                    ]);
+
+      // Owner can update.
+      // A non-owner can only remove themselves.
+      // A non-member can add themselves using an invite code.
+      allow update: if signedIn() &&
+        (
+          isOwner(groupId) ||
+
+          isLeavingGroup() ||
+
+          (
+            !isMember(groupId) &&
+            request.resource.data.diff(resource.data)
+              .affectedKeys()
+              .hasOnly(['memberIds']) &&
+            request.resource.data.memberIds.hasAll(
+              resource.data.memberIds
+            ) &&
+            request.resource.data.memberIds.hasAny([
+              request.auth.uid
+            ]) &&
+            request.resource.data.memberIds.size() ==
+              resource.data.memberIds.size() + 1
+          )
+        );
+
+      // Only owner can delete.
+      allow delete: if signedIn() &&
+                    isOwner(groupId);
+
+      // -------------------------
+// Group member profiles
+// -------------------------
+
+match /members/{memberId} {
+
+  // Group members can read member profiles.
+  allow read: if signedIn() &&
+              isMember(groupId);
+
+  // A user can create only their own member profile.
+  // getAfter() allows this during the atomic join batch,
+  // because the user will be a member in the final group state.
+  allow create: if signedIn() &&
+                memberId == request.auth.uid &&
+                request.resource.data.uid == request.auth.uid &&
+                getAfter(
+                  /databases/$(database)/documents/groups/$(groupId)
+                ).data.memberIds.hasAny([
+                  request.auth.uid
+                ]);
+
+  // A user can update only their own member profile.
+  allow update: if signedIn() &&
+                memberId == request.auth.uid &&
+                isMember(groupId) &&
+                request.resource.data.uid == request.auth.uid;
+
+  // A member can delete their own profile when leaving.
+  // Owner/admin can delete another member's profile.
+  allow delete: if signedIn() &&
+                (
+                  memberId == request.auth.uid ||
+                  isOwner(groupId) ||
+                  isAdmin(groupId)
+                );
+}
+
+
+      // -------------------------
+      // Events inside a group
+      // -------------------------
+
+      match /events/{eventId} {
+
+        // Any group member can read events.
+        allow read: if signedIn() &&
+                    isMember(groupId);
+
+        // Any group member can create an event,
+        // but only as themselves and for this group.
+        allow create: if signedIn() &&
+                      isMember(groupId) &&
+                      request.resource.data.groupId == groupId &&
+                      request.resource.data.createdBy ==
+                        request.auth.uid;
+
+        // Event creator OR admin OR owner can update.
+        allow update: if signedIn() &&
+                      isMember(groupId) &&
+                      request.resource.data.groupId == groupId &&
+                      (
+                        resource.data.createdBy ==
+                          request.auth.uid ||
+                        isAdmin(groupId) ||
+                        isOwner(groupId)
+                      );
+
+        // Event creator OR admin OR owner can delete.
+        allow delete: if signedIn() &&
+                      isMember(groupId) &&
+                      (
+                        resource.data.createdBy ==
+                          request.auth.uid ||
+                        isAdmin(groupId) ||
+                        isOwner(groupId)
+                      );
+      }
+    }
+  }
+}

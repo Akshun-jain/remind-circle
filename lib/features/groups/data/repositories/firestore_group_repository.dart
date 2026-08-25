@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:flutter/foundation.dart';
 import 'package:remind_circle/core/services/firestore_service.dart';
 import 'package:remind_circle/features/groups/data/repositories/group_repository.dart';
 import 'package:remind_circle/features/groups/domain/models/group.dart';
@@ -48,6 +47,20 @@ class FirestoreGroupRepository implements GroupRepository {
     final inviteCodeDoc = _firestoreService.inviteCodes.doc(group.inviteCode);
 
     batch.set(inviteCodeDoc, {'groupId': group.id});
+
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null || currentUser.uid != ownerId) {
+      throw Exception('You must be signed in as the group owner.');
+    }
+
+    final memberDoc = _firestoreService.groupMembers(group.id).doc(ownerId);
+
+    batch.set(memberDoc, {
+      'uid': ownerId,
+      'name': currentUser.displayName ?? 'User',
+      'photoUrl': currentUser.photoURL,
+    });
 
     await batch.commit();
 
@@ -112,9 +125,24 @@ class FirestoreGroupRepository implements GroupRepository {
       throw Exception('Authentication mismatch.');
     }
 
-    await _firestoreService.groups.doc(groupId).update({
+    final groupRef = _firestoreService.groups.doc(groupId);
+    final memberRef = _firestoreService
+        .groupMembers(groupId)
+        .doc(currentUser.uid);
+
+    final batch = FirebaseFirestore.instance.batch();
+
+    batch.update(groupRef, {
       'memberIds': FieldValue.arrayUnion([currentUser.uid]),
     });
+
+    batch.set(memberRef, {
+      'uid': currentUser.uid,
+      'name': currentUser.displayName ?? 'User',
+      'photoUrl': currentUser.photoURL,
+    });
+
+    await batch.commit();
   }
 
   @override
@@ -170,10 +198,19 @@ class FirestoreGroupRepository implements GroupRepository {
     required String groupId,
     required String userId,
   }) async {
-    await _firestoreService.groups.doc(groupId).update({
+    final groupRef = _firestoreService.groups.doc(groupId);
+    final memberRef = _firestoreService.groupMembers(groupId).doc(userId);
+
+    final batch = FirebaseFirestore.instance.batch();
+
+    batch.update(groupRef, {
       'memberIds': FieldValue.arrayRemove([userId]),
       'admins': FieldValue.arrayRemove([userId]),
     });
+
+    batch.delete(memberRef);
+
+    await batch.commit();
   }
 
   @override
@@ -181,9 +218,18 @@ class FirestoreGroupRepository implements GroupRepository {
     required String groupId,
     required String userId,
   }) async {
-    await _firestoreService.groups.doc(groupId).update({
+    final groupRef = _firestoreService.groups.doc(groupId);
+    final memberRef = _firestoreService.groupMembers(groupId).doc(userId);
+
+    final batch = FirebaseFirestore.instance.batch();
+
+    batch.update(groupRef, {
       'memberIds': FieldValue.arrayRemove([userId]),
       'admins': FieldValue.arrayRemove([userId]),
     });
+
+    batch.delete(memberRef);
+
+    await batch.commit();
   }
 }

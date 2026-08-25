@@ -18,4 +18,9 @@ class FirestoreService {
   CollectionReference<Map<String, dynamic>> groupEvents(String groupId) {
     return groups.doc(groupId).collection('events');
   }
+
+  /// Members inside a group
+  CollectionReference<Map<String, dynamic>> groupMembers(String groupId) {
+    return groups.doc(groupId).collection('members');
+  }
 }
