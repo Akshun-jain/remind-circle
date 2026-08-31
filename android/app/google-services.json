@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "796465793361-0ulv1t7n1tfokdc4kf9jnvogeoduegdt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.remind_circle",
+            "certificate_hash": "68687b6c791e3fe87019eac010618b964357f9d0"
+          }
+        },
+        {
           "client_id": "796465793361-9os5u2q5m2h8i7ctje033it5dlcgouun.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

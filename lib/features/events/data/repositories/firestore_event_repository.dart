@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer' as developer;
+
 import 'package:remind_circle/core/services/firestore_service.dart';
 import 'package:remind_circle/features/events/data/repositories/event_repository.dart';
 import 'package:remind_circle/features/events/domain/models/event.dart';
@@ -28,7 +31,18 @@ class FirestoreEventRepository implements EventRepository {
       isActive: event.isActive,
     );
 
-    await doc.set(savedEvent.toMap());
+    // Firestore queues writes locally while offline. Do not await the server
+    // acknowledgement here, otherwise the Save UI can remain loading until
+    // connectivity is restored.
+    unawaited(
+      doc.set(savedEvent.toMap()).catchError((error, stackTrace) {
+        developer.log(
+          'Failed to write event to Firestore',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
 
     return savedEvent;
   }

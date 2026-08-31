@@ -126,6 +126,36 @@ class FirestoreGroupRepository implements GroupRepository {
     }
 
     final groupRef = _firestoreService.groups.doc(groupId);
+
+    // A current member is allowed to read the group, so check membership
+    // before attempting the join update. A non-member cannot read the group
+    // by design; in that case we continue and let the secured update rule
+    // authorize the actual join.
+    try {
+      final groupSnapshot = await groupRef.get(
+        const GetOptions(source: Source.server),
+      );
+
+      if (!groupSnapshot.exists) {
+        throw Exception(
+          'Group not found. Please check the invite code and try again.',
+        );
+      }
+
+      final groupData = groupSnapshot.data();
+      final memberIds = List<String>.from(groupData?['memberIds'] ?? const []);
+
+      if (memberIds.contains(currentUser.uid)) {
+        throw Exception("You're already a member of this group.");
+      }
+    } on FirebaseException catch (e) {
+      // Non-members are intentionally denied read access to the group.
+      // Continue to the secured join update in that case.
+      if (e.code != 'permission-denied') {
+        rethrow;
+      }
+    }
+
     final memberRef = _firestoreService
         .groupMembers(groupId)
         .doc(currentUser.uid);
@@ -142,7 +172,16 @@ class FirestoreGroupRepository implements GroupRepository {
       'photoUrl': currentUser.photoURL,
     });
 
-    await batch.commit();
+    try {
+      await batch.commit();
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw Exception(
+          'Unable to join this group. Please check the invite code and try again.',
+        );
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -157,6 +196,14 @@ class FirestoreGroupRepository implements GroupRepository {
 
   @override
   Future<void> deleteGroup(String groupId) async {
+    final groupRef = _firestoreService.groups.doc(groupId);
+    final groupSnapshot = await groupRef.get();
+
+    if (!groupSnapshot.exists) {
+      return;
+    }
+
+    final group = Group.fromMap(groupSnapshot.id, groupSnapshot.data()!);
     final groupEvents = _firestoreService.groupEvents(groupId);
 
     final snapshot = await groupEvents.get();
@@ -168,6 +215,7 @@ class FirestoreGroupRepository implements GroupRepository {
     }
 
     batch.delete(_firestoreService.groups.doc(groupId));
+    batch.delete(_firestoreService.inviteCodes.doc(group.inviteCode));
 
     await batch.commit();
   }

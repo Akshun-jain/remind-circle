@@ -5,7 +5,5 @@ import 'package:remind_circle/features/events/data/repositories/event_repository
 import 'package:remind_circle/features/events/data/repositories/firestore_event_repository.dart';
 
 final eventRepositoryProvider = Provider<EventRepository>((ref) {
-  return FirestoreEventRepository(
-    FirestoreService(),
-  );
+  return FirestoreEventRepository(FirestoreService());
 });

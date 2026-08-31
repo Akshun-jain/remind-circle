@@ -3,7 +3,8 @@ import 'package:remind_circle/features/user/data/models/user_profile_model.dart'
 import 'package:remind_circle/features/user/data/repositories/user_repository.dart';
 import 'package:remind_circle/features/user/domain/models/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+
+//import 'package:flutter/foundation.dart';
 
 class FirestoreUserRepository implements UserRepository {
   FirestoreUserRepository(this._firestoreService);
@@ -56,22 +57,13 @@ class FirestoreUserRepository implements UserRepository {
 
   @override
   Future<List<UserProfile>> getUsersByIds(List<String> uids) async {
-    debugPrint("Searching Firestore for: $uids");
-
     if (uids.isEmpty) {
-      debugPrint("UID list is empty");
       return [];
     }
 
     final snapshot = await _firestoreService.users
         .where(FieldPath.documentId, whereIn: uids)
         .get();
-
-    debugPrint("Firestore docs found: ${snapshot.docs.length}");
-
-    for (final doc in snapshot.docs) {
-      debugPrint("Found user document: ${doc.id}");
-    }
 
     return snapshot.docs
         .map((doc) => UserProfileModel.fromMap(doc.data()))

@@ -42,156 +42,157 @@ class UpcomingEventsSection extends ConsumerWidget {
 
             return groups.when(
               data: (groupList) {
-                return Column(
-                  children: events.map((event) {
-                    final nextOccurrence = RecurrenceService.getNextOccurrence(
-                      event,
-                    );
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 360),
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: events.map((event) {
+                      final nextOccurrence =
+                          RecurrenceService.getNextOccurrence(event);
 
-                    if (nextOccurrence == null) {
-                      return const SizedBox.shrink();
-                    }
-
-                    Group? matchedGroup;
-
-                    for (final candidate in groupList) {
-                      if (candidate.id == event.groupId) {
-                        matchedGroup = candidate;
-                        break;
+                      if (nextOccurrence == null) {
+                        return const SizedBox.shrink();
                       }
-                    }
 
-                    if (matchedGroup == null) {
-                      return const SizedBox.shrink();
-                    }
+                      Group? matchedGroup;
 
-                    final group = matchedGroup;
+                      for (final candidate in groupList) {
+                        if (candidate.id == event.groupId) {
+                          matchedGroup = candidate;
+                          break;
+                        }
+                      }
 
-                    final userId = currentUser?.uid;
+                      if (matchedGroup == null) {
+                        return const SizedBox.shrink();
+                      }
 
-                    final canManageEvent =
-                        userId != null &&
-                        (event.createdBy == userId ||
-                            group.ownerId == userId ||
-                            group.admins.contains(userId));
+                      final group = matchedGroup;
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => EventDetailsScreen(
-                                event: event,
-                                group: group,
-                                canManageEvent: canManageEvent,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              CircleAvatar(
-                                radius: 24,
-                                child: Icon(
-                                  _iconForEvent(event.eventType.name),
+                      final userId = currentUser?.uid;
+
+                      final canManageEvent =
+                          userId != null &&
+                          (event.createdBy == userId ||
+                              group.ownerId == userId ||
+                              group.admins.contains(userId));
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EventDetailsScreen(
+                                  event: event,
+                                  group: group,
+                                  canManageEvent: canManageEvent,
                                 ),
                               ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 24,
+                                  child: Icon(
+                                    _iconForEvent(event.eventType.name),
+                                  ),
+                                ),
 
-                              const SizedBox(width: 14),
+                                const SizedBox(width: 14),
 
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        event.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+
+                                      if (event.personName != null &&
+                                          event.personName!.trim().isNotEmpty &&
+                                          event.personName!.trim() !=
+                                              event.title.trim()) ...[
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          event.personName!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade700,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+
+                                      if (group.name.trim().isNotEmpty) ...[
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          group.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade700,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+
+                                      const SizedBox(height: 6),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(width: 12),
+
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      event.title,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                      DateFormat(
+                                        'd MMM',
+                                      ).format(nextOccurrence),
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
                                       ),
                                     ),
 
-                                    if (event.personName != null &&
-                                        event.personName!.trim().isNotEmpty &&
-                                        event.personName!.trim() !=
-                                            event.title.trim()) ...[
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        event.personName!,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Colors.grey.shade700,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
+                                    const SizedBox(height: 4),
 
-                                    if (group.name.trim().isNotEmpty) ...[
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        group.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Colors.grey.shade700,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                    Text(
+                                      _relativeDate(nextOccurrence),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
                                       ),
-                                    ],
+                                    ),
 
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: 2),
                                   ],
                                 ),
-                              ),
-
-                              const SizedBox(width: 12),
-
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    DateFormat('d MMM').format(nextOccurrence),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 4),
-
-                                  Text(
-                                    _relativeDate(nextOccurrence),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 2),
-
-                                  const Icon(
-                                    Icons.chevron_right,
-                                    size: 18,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 );
               },
 

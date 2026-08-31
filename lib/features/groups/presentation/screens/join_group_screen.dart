@@ -33,9 +33,6 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
 
     final user = FirebaseAuth.instance.currentUser!;
 
-    debugPrint('JOIN DEBUG - Firebase Auth UID: ${user.uid}');
-    debugPrint('JOIN DEBUG - Invite Code: $inviteCode');
-
     try {
       await ref
           .read(groupControllerProvider.notifier)
@@ -51,9 +48,13 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
     } catch (e) {
       if (!mounted) return;
 
+      final message = e.toString().startsWith('Exception: ')
+          ? e.toString().substring('Exception: '.length)
+          : e.toString();
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 

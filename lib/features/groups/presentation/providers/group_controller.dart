@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:remind_circle/core/providers/group_repository_provider.dart';
 import 'package:remind_circle/features/groups/domain/models/group.dart';
 import 'package:remind_circle/core/providers/auth_provider.dart';
+import 'package:remind_circle/features/home/presentation/providers/upcoming_events_provider.dart';
 
 final groupProvider = StreamProvider.family<Group?, String>((ref, groupId) {
   final authState = ref.watch(authStateProvider);
@@ -53,6 +54,13 @@ class GroupController extends AsyncNotifier<Group?> {
       final repository = ref.read(groupRepositoryProvider);
 
       await repository.joinGroup(inviteCode: inviteCode, userId: userId);
+
+      // The dashboard's upcoming-events provider is a cached FutureProvider.
+      // Joining a group changes which events the user can access, so invalidate
+      // it immediately after the membership write succeeds. This causes the
+      // dashboard to fetch the newly accessible group events when the user
+      // returns from the Join Group screen.
+      ref.invalidate(upcomingEventsProvider);
 
       return null;
     });

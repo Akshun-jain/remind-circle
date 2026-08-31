@@ -50,7 +50,8 @@ class CreateEventScreen extends ConsumerWidget {
                     return AlertDialog(
                       title: const Text('Delete Event'),
                       content: const Text(
-                        'Are you sure you want to delete this event? This action cannot be undone.',
+                        'Are you sure you want to delete this event? '
+                        'This action cannot be undone.',
                       ),
                       actions: [
                         TextButton(
@@ -91,8 +92,6 @@ class CreateEventScreen extends ConsumerWidget {
                     ? (data.personName ?? '')
                     : (data.title ?? data.eventType.name);
 
-                //debugPrint('Form eventTime: ${data.eventTime}');
-
                 final event = initialEvent == null
                     ? Event(
                         id: '',
@@ -125,13 +124,17 @@ class CreateEventScreen extends ConsumerWidget {
 
                 final controller = ref.read(eventControllerProvider.notifier);
 
+                Event? savedEvent;
+
                 if (initialEvent == null) {
-                  await controller.createEvent(event);
+                  savedEvent = await controller.createEvent(event);
                 } else {
                   await controller.updateEvent(
                     oldEvent: initialEvent!,
                     newEvent: event,
                   );
+
+                  savedEvent = event;
                 }
 
                 if (!context.mounted) return;
@@ -139,7 +142,7 @@ class CreateEventScreen extends ConsumerWidget {
                 final state = ref.read(eventControllerProvider);
 
                 if (!state.hasError) {
-                  Navigator.pop(context, event);
+                  Navigator.pop(context, savedEvent);
                 }
               },
             ),

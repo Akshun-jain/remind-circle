@@ -21,5 +21,6 @@
 
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
-  "cmake.sourceDirectory": "C:/Users/akshu/Downloads/remind_circle/linux"
+  "cmake.sourceDirectory": "C:/Users/akshu/Downloads/remind_circle/linux",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

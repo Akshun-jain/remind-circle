@@ -34,5 +34,5 @@ final upcomingEventsProvider = FutureProvider<List<Event>>((ref) async {
     (a, b) => a.nextOccurrence!.compareTo(b.nextOccurrence!),
   );
 
-  return upcomingWithDates.take(3).map((item) => item.event).toList();
+  return upcomingWithDates.map((item) => item.event).toList();
 });

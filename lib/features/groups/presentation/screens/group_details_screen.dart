@@ -283,84 +283,86 @@ class GroupDetailsScreen extends ConsumerWidget {
                           ],
                         ),
 
-                        const Divider(height: 32),
+                        if (isOwner || group.isAdmin(currentUid!)) ...[
+                          const Divider(height: 32),
 
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.key),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.key),
 
-                            const SizedBox(width: 12),
+                              const SizedBox(width: 12),
 
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Invite Code',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Invite Code',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
 
-                                  const SizedBox(height: 4),
+                                    const SizedBox(height: 4),
 
-                                  Text(
-                                    group.inviteCode,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      letterSpacing: 1.2,
-                                      fontWeight: FontWeight.w600,
+                                    Text(
+                                      group.inviteCode,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        letterSpacing: 1.2,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
 
-                                  const SizedBox(height: 12),
+                                    const SizedBox(height: 12),
 
-                                  Row(
-                                    children: [
-                                      OutlinedButton.icon(
-                                        icon: const Icon(Icons.copy),
-                                        label: const Text('Copy'),
-                                        onPressed: () async {
-                                          await Clipboard.setData(
-                                            ClipboardData(
-                                              text: group.inviteCode,
-                                            ),
-                                          );
-
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Invite code copied',
-                                                ),
+                                    Row(
+                                      children: [
+                                        OutlinedButton.icon(
+                                          icon: const Icon(Icons.copy),
+                                          label: const Text('Copy'),
+                                          onPressed: () async {
+                                            await Clipboard.setData(
+                                              ClipboardData(
+                                                text: group.inviteCode,
                                               ),
                                             );
-                                          }
-                                        },
-                                      ),
 
-                                      const SizedBox(width: 12),
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Invite code copied',
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        ),
 
-                                      OutlinedButton.icon(
-                                        icon: const Icon(Icons.share),
-                                        label: const Text('Share'),
-                                        onPressed: () {
-                                          Share.share(
-                                            'Join my RemindCircle group!\n\n'
-                                            'Invite Code: ${group.inviteCode}',
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                        const SizedBox(width: 12),
+
+                                        OutlinedButton.icon(
+                                          icon: const Icon(Icons.share),
+                                          label: const Text('Share'),
+                                          onPressed: () {
+                                            Share.share(
+                                              'Join my RemindCircle group!\n\n'
+                                              'Invite Code: ${group.inviteCode}',
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
