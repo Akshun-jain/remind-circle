@@ -1,4 +1,4 @@
-package com.example.remind_circle
+package com.remindcircle.app
 
 import io.flutter.embedding.android.FlutterActivity
 
