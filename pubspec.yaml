@@ -1,7 +1,7 @@
 name: remind_circle
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+9
 
 environment:
   sdk: ^3.11.0
@@ -11,8 +11,9 @@ dependencies:
   google_sign_in: ^7.1.1
 
   firebase_core: ^4.12.1
-  firebase_auth: ^6.5.6
+  firebase_auth: 6.6.1
   cloud_firestore: ^6.7.1
+  firebase_messaging: ^16.1.0
 
   flutter_local_notifications: ^19.4.0
   timezone: ^0.10.1
@@ -37,6 +38,7 @@ dependencies:
   flutter_timezone: ^4.1.1
 
   share_plus: ^10.0.0
+  cloud_functions: ^6.4.0
 
 dev_dependencies:
   flutter_test:

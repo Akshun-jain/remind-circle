@@ -13,6 +13,7 @@ import 'package:remind_circle/core/services/firestore_service.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:remind_circle/features/home/data/repositories/firestore_home_repository.dart';
+import 'package:remind_circle/core/notifications/fcm_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +23,7 @@ Future<void> main() async {
   // Firebase is required by the app's providers, so it remains a startup
   // prerequisite. Notification setup and rescheduling are non-critical startup
   // work and should not block the first frame.
-  runApp(const ProviderScope(child: RemindCircleApp()));
+  runApp(ProviderScope(child: RemindCircleApp()));
 
   // Finish notification setup in the background after the app is visible.
   unawaited(_initializeNotificationsInBackground());
@@ -32,6 +33,11 @@ Future<void> _initializeNotificationsInBackground() async {
   try {
     await NotificationService.instance.initialize();
     await NotificationPermission.request();
+
+    // Initialize FCM notification-tap handling before checking auth.
+    // This is required for notification taps that launch a completely
+    // terminated app.
+    await FcmService.instance.initialize();
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;

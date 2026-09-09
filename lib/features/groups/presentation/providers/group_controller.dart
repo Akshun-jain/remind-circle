@@ -4,7 +4,10 @@ import 'package:remind_circle/features/groups/domain/models/group.dart';
 import 'package:remind_circle/core/providers/auth_provider.dart';
 import 'package:remind_circle/features/home/presentation/providers/upcoming_events_provider.dart';
 
-final groupProvider = StreamProvider.family<Group?, String>((ref, groupId) {
+final groupProvider = StreamProvider.autoDispose.family<Group?, String>((
+  ref,
+  groupId,
+) {
   final authState = ref.watch(authStateProvider);
 
   // Do not attach Firestore listeners while signed out.

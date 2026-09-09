@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:remind_circle/core/providers/auth_repository_provider.dart';
 import 'package:remind_circle/features/user/data/providers/user_profile_service_provider.dart';
 import 'package:remind_circle/core/notifications/notification_service.dart';
+import 'package:remind_circle/core/notifications/fcm_service.dart';
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(
   AuthController.new,
@@ -22,6 +23,8 @@ class AuthController extends AsyncNotifier<void> {
       final userProfileService = ref.read(userProfileServiceProvider);
 
       await userProfileService.syncCurrentUser();
+
+      await FcmService.instance.initialize();
     });
   }
 
@@ -32,7 +35,7 @@ class AuthController extends AsyncNotifier<void> {
       await NotificationService.instance.cancelAllNotifications();
 
       final authRepository = ref.read(authRepositoryProvider);
-
+      await FcmService.instance.unregister();
       await authRepository.signOut();
     });
   }

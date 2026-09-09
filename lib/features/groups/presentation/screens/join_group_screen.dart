@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 import 'package:remind_circle/features/groups/presentation/providers/group_controller.dart';
-import 'package:flutter/services.dart';
 
 class JoinGroupScreen extends ConsumerStatefulWidget {
   const JoinGroupScreen({super.key});
@@ -15,6 +15,8 @@ class JoinGroupScreen extends ConsumerStatefulWidget {
 class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   final _controller = TextEditingController();
 
+  bool _isSubmitting = false;
+
   @override
   void dispose() {
     _controller.dispose();
@@ -22,16 +24,28 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   }
 
   Future<void> _joinGroup() async {
+    // Prevent duplicate submissions from rapid taps.
+    if (_isSubmitting) return;
+
     final inviteCode = _controller.text.trim().toUpperCase();
 
+    // Show only one validation error.
     if (inviteCode.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      messenger.showSnackBar(
         const SnackBar(content: Text('Invite code must be 6 characters.')),
       );
       return;
     }
 
-    final user = FirebaseAuth.instance.currentUser!;
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
 
     try {
       await ref
@@ -52,15 +66,22 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
           ? e.toString().substring('Exception: '.length)
           : e.toString();
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final loading = ref.watch(groupControllerProvider).isLoading;
+    final submitting = _isSubmitting || loading;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Join Group')),
@@ -86,8 +107,8 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: loading ? null : _joinGroup,
-                child: loading
+                onPressed: submitting ? null : _joinGroup,
+                child: submitting
                     ? const CircularProgressIndicator()
                     : const Text('Join Group'),
               ),

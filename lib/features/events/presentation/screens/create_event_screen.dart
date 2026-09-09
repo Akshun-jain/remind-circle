@@ -76,84 +76,87 @@ class CreateEventScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: EventForm(
-              initialEvent: initialEvent,
-              onSubmit: (data) async {
-                final bool usesPersonName =
-                    data.eventType == EventType.birthday ||
-                    data.eventType == EventType.anniversary ||
-                    data.eventType == EventType.workAnniversary;
+      body: SafeArea(
+        top: false,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: EventForm(
+                initialEvent: initialEvent,
+                onSubmit: (data) async {
+                  final bool usesPersonName =
+                      data.eventType == EventType.birthday ||
+                      data.eventType == EventType.anniversary ||
+                      data.eventType == EventType.workAnniversary;
 
-                final title = usesPersonName
-                    ? (data.personName ?? '')
-                    : (data.title ?? data.eventType.name);
+                  final title = usesPersonName
+                      ? (data.personName ?? '')
+                      : (data.title ?? data.eventType.name);
 
-                final event = initialEvent == null
-                    ? Event(
-                        id: '',
-                        groupId: group.id,
-                        title: title,
-                        personName: data.personName,
-                        eventType: data.eventType,
-                        eventDate: data.eventDate,
-                        eventTime: data.eventTime,
-                        repeatType: data.repeatType,
-                        notifyBefore: data.notifyBefore,
-                        notes: data.notes,
-                        createdBy: user.uid,
-                        createdByName:
-                            user.displayName ?? user.email ?? 'Unknown User',
-                        createdAt: DateTime.now(),
-                        isActive: true,
-                      )
-                    : initialEvent!.copyWith(
-                        title: title,
-                        personName: data.personName,
-                        eventType: data.eventType,
-                        eventDate: data.eventDate,
-                        eventTime: data.eventTime,
-                        clearEventTime: data.eventTime == null,
-                        repeatType: data.repeatType,
-                        notifyBefore: data.notifyBefore,
-                        notes: data.notes,
-                      );
+                  final event = initialEvent == null
+                      ? Event(
+                          id: '',
+                          groupId: group.id,
+                          title: title,
+                          personName: data.personName,
+                          eventType: data.eventType,
+                          eventDate: data.eventDate,
+                          eventTime: data.eventTime,
+                          repeatType: data.repeatType,
+                          notifyBefore: data.notifyBefore,
+                          notes: data.notes,
+                          createdBy: user.uid,
+                          createdByName:
+                              user.displayName ?? user.email ?? 'Unknown User',
+                          createdAt: DateTime.now(),
+                          isActive: true,
+                        )
+                      : initialEvent!.copyWith(
+                          title: title,
+                          personName: data.personName,
+                          eventType: data.eventType,
+                          eventDate: data.eventDate,
+                          eventTime: data.eventTime,
+                          clearEventTime: data.eventTime == null,
+                          repeatType: data.repeatType,
+                          notifyBefore: data.notifyBefore,
+                          notes: data.notes,
+                        );
 
-                final controller = ref.read(eventControllerProvider.notifier);
+                  final controller = ref.read(eventControllerProvider.notifier);
 
-                Event? savedEvent;
+                  Event? savedEvent;
 
-                if (initialEvent == null) {
-                  savedEvent = await controller.createEvent(event);
-                } else {
-                  await controller.updateEvent(
-                    oldEvent: initialEvent!,
-                    newEvent: event,
-                  );
+                  if (initialEvent == null) {
+                    savedEvent = await controller.createEvent(event);
+                  } else {
+                    await controller.updateEvent(
+                      oldEvent: initialEvent!,
+                      newEvent: event,
+                    );
 
-                  savedEvent = event;
-                }
+                    savedEvent = event;
+                  }
 
-                if (!context.mounted) return;
+                  if (!context.mounted) return;
 
-                final state = ref.read(eventControllerProvider);
+                  final state = ref.read(eventControllerProvider);
 
-                if (!state.hasError) {
-                  Navigator.pop(context, savedEvent);
-                }
-              },
+                  if (!state.hasError) {
+                    Navigator.pop(context, savedEvent);
+                  }
+                },
+              ),
             ),
-          ),
 
-          if (controller.isLoading)
-            const ColoredBox(
-              color: Color(0x66000000),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-        ],
+            if (controller.isLoading)
+              const ColoredBox(
+                color: Color(0x66000000),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+          ],
+        ),
       ),
     );
   }

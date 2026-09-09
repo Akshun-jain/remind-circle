@@ -74,6 +74,14 @@
           }
         },
         {
+          "client_id": "796465793361-r9ori1odkqisj6ludqnncekeovupm884.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.remindcircle.app",
+            "certificate_hash": "3262f9755f75a28511208cb51067421bff6947e3"
+          }
+        },
+        {
           "client_id": "796465793361-rhq02p2i4nfjim0b4vosplos72gahc0l.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

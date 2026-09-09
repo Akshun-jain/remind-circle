@@ -15,6 +15,8 @@ import 'package:remind_circle/features/home/presentation/widgets/groups_section.
 
 import 'package:remind_circle/features/home/presentation/widgets/upcoming_events_section.dart';
 
+import 'package:remind_circle/core/services/account_deletion_service.dart';
+
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -29,34 +31,90 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) async {
-              if (value != 'signOut') return;
+              if (value == 'signOut') {
+                final shouldSignOut = await showDialog<bool>(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('Sign Out'),
+                      content: const Text('Are you sure you want to sign out?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Sign Out'),
+                        ),
+                      ],
+                    );
+                  },
+                );
 
-              final shouldSignOut = await showDialog<bool>(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text('Sign Out'),
-                    content: const Text('Are you sure you want to sign out?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancel'),
+                if (shouldSignOut != true) return;
+
+                await ref.read(authControllerProvider.notifier).signOut();
+
+                return;
+              }
+
+              if (value == 'deleteAccount') {
+                final shouldDelete = await showDialog<bool>(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('Delete Account'),
+                      content: const Text(
+                        'This will permanently delete your account, '
+                        'your profile, and your associated RemindCircle data.\n\n'
+                        'This action cannot be undone.',
                       ),
-                      FilledButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Sign Out'),
-                      ),
-                    ],
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Delete Account'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (shouldDelete != true) return;
+
+                try {
+                  await AccountDeletionService.deleteAccount();
+
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Your account has been deleted.'),
+                    ),
                   );
-                },
-              );
+                } catch (e) {
+                  if (!context.mounted) return;
 
-              if (shouldSignOut != true) return;
-
-              await ref.read(authControllerProvider.notifier).signOut();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        e.toString().replaceFirst('Exception: ', ''),
+                      ),
+                    ),
+                  );
+                }
+              }
             },
             itemBuilder: (context) => const [
-              PopupMenuItem(value: 'signOut', child: Text('Sign Out')),
+              PopupMenuItem<String>(value: 'signOut', child: Text('Sign Out')),
+              PopupMenuItem<String>(
+                value: 'deleteAccount',
+                child: Text('Delete Account'),
+              ),
             ],
           ),
         ],

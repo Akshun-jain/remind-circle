@@ -110,19 +110,26 @@ class GroupDetailsScreen extends ConsumerWidget {
 
     final controller = ref.read(groupControllerProvider.notifier);
 
-    await controller.leaveGroup(groupId: groupId, userId: userId);
+    try {
+      await controller.leaveGroup(groupId: groupId, userId: userId);
+    } catch (e) {
+      if (!context.mounted) return;
 
-    if (!context.mounted) return;
+      final message = e.toString().startsWith('Exception: ')
+          ? e.toString().substring('Exception: '.length)
+          : e.toString();
 
-    final state = ref.read(groupControllerProvider);
-
-    if (state.hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to leave group: ${state.error}')),
+        SnackBar(content: Text('Failed to leave group: $message')),
       );
+
       return;
     }
 
+    if (!context.mounted) return;
+
+    // Leave succeeded. Navigate away before the old group listener
+    // can rebuild with a permission-denied error.
     Navigator.pop(context);
 
     ScaffoldMessenger.of(

@@ -124,6 +124,7 @@ class _EventFormState extends State<EventForm> {
       key: _formKey,
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
+          top: 8,
           bottom: MediaQuery.of(context).viewInsets.bottom + 24,
         ),
         child: Column(
@@ -203,9 +204,20 @@ class _EventFormState extends State<EventForm> {
         border: OutlineInputBorder(),
       ),
       validator: (value) {
-        if (_requiresPersonName && (value == null || value.trim().isEmpty)) {
+        final name = value?.trim() ?? '';
+
+        if (_requiresPersonName && name.isEmpty) {
           return 'Please enter a name';
         }
+
+        if (_requiresPersonName &&
+            !RegExp(
+              r"^[\p{L}]+(?:[\s'-][\p{L}]+)*$",
+              unicode: true,
+            ).hasMatch(name)) {
+          return 'Please enter a valid name. Numbers and special characters are not allowed.';
+        }
+
         return null;
       },
     );

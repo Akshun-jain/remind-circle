@@ -134,6 +134,16 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
             const Divider(height: 28),
 
             _infoRow(
+              icon: Icons.person_outline,
+              title: 'Added by',
+              value: event.createdByName.trim().isEmpty
+                  ? 'Deleted User'
+                  : event.createdByName,
+            ),
+
+            const Divider(height: 28),
+
+            _infoRow(
               icon: Icons.schedule,
               title: 'Time',
               value: event.eventTime == null

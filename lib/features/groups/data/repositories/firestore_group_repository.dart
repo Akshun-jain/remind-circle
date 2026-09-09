@@ -100,7 +100,9 @@ class FirestoreGroupRepository implements GroupRepository {
         .get(const GetOptions(source: Source.server));
 
     if (!inviteCodeDoc.exists) {
-      throw Exception('Group not found.');
+      throw Exception(
+        'This invite code is invalid or unavailable. Please ask the group owner for a new invite code.',
+      );
     }
 
     final data = inviteCodeDoc.data();
@@ -208,14 +210,21 @@ class FirestoreGroupRepository implements GroupRepository {
 
     final snapshot = await groupEvents.get();
 
+    final inviteCodeRef = _firestoreService.inviteCodes.doc(group.inviteCode);
+
+    final inviteCodeSnapshot = await inviteCodeRef.get();
+
     final batch = FirebaseFirestore.instance.batch();
 
     for (final doc in snapshot.docs) {
       batch.delete(doc.reference);
     }
 
-    batch.delete(_firestoreService.groups.doc(groupId));
-    batch.delete(_firestoreService.inviteCodes.doc(group.inviteCode));
+    batch.delete(groupRef);
+
+    if (inviteCodeSnapshot.exists) {
+      batch.delete(inviteCodeRef);
+    }
 
     await batch.commit();
   }

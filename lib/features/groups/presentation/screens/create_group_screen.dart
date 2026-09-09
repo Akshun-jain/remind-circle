@@ -8,13 +8,13 @@ class CreateGroupScreen extends ConsumerStatefulWidget {
   const CreateGroupScreen({super.key});
 
   @override
-  ConsumerState<CreateGroupScreen> createState() =>
-      _CreateGroupScreenState();
+  ConsumerState<CreateGroupScreen> createState() => _CreateGroupScreenState();
 }
 
-class _CreateGroupScreenState
-    extends ConsumerState<CreateGroupScreen> {
+class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   final _controller = TextEditingController();
+
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -23,13 +23,17 @@ class _CreateGroupScreenState
   }
 
   Future<void> _createGroup() async {
+    // Prevent multiple submissions from rapid taps.
+    if (_isSubmitting) return;
+
     final name = _controller.text.trim();
 
+    // Show only one validation SnackBar.
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a group name.'),
-        ),
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Please enter a group name.')),
       );
       return;
     }
@@ -38,34 +42,49 @@ class _CreateGroupScreenState
 
     if (user == null) return;
 
-    final group = await ref
-        .read(groupControllerProvider.notifier)
-        .createGroup(
-          name: name,
-          ownerId: user.uid,
-        );
+    setState(() {
+      _isSubmitting = true;
+    });
 
-    if (!mounted) return;
+    try {
+      final group = await ref
+          .read(groupControllerProvider.notifier)
+          .createGroup(name: name, ownerId: user.uid);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Group "${group.name}" created!\nInvite Code: ${group.inviteCode}',
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Group "${group.name}" created!\n'
+            'Invite Code: ${group.inviteCode}',
+          ),
         ),
-      ),
-    );
+      );
 
-    _controller.clear();
+      _controller.clear();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final loading = ref.watch(groupControllerProvider).isLoading;
+    final submitting = _isSubmitting || loading;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Group'),
-      ),
+      appBar: AppBar(title: const Text('Create Group')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -81,8 +100,8 @@ class _CreateGroupScreenState
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: loading ? null : _createGroup,
-                child: loading
+                onPressed: submitting ? null : _createGroup,
+                child: submitting
                     ? const CircularProgressIndicator()
                     : const Text('Create Group'),
               ),
