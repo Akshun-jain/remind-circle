@@ -202,6 +202,8 @@ class _EventFormState extends State<EventForm> {
       decoration: const InputDecoration(
         labelText: 'Person Name',
         border: OutlineInputBorder(),
+        errorMaxLines: 2,
+        errorStyle: TextStyle(fontSize: 12, height: 1.3),
       ),
       validator: (value) {
         final name = value?.trim() ?? '';

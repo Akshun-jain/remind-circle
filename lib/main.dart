@@ -15,6 +15,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:remind_circle/features/home/data/repositories/firestore_home_repository.dart';
 import 'package:remind_circle/core/notifications/fcm_service.dart';
 
+import 'package:remind_circle/core/notifications/notification_navigation_service.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -23,6 +25,8 @@ Future<void> main() async {
   // Firebase is required by the app's providers, so it remains a startup
   // prerequisite. Notification setup and rescheduling are non-critical startup
   // work and should not block the first frame.
+  NotificationNavigationService.instance.beginStartupCheck();
+
   runApp(ProviderScope(child: RemindCircleApp()));
 
   // Finish notification setup in the background after the app is visible.
@@ -30,6 +34,8 @@ Future<void> main() async {
 }
 
 Future<void> _initializeNotificationsInBackground() async {
+  bool notificationLaunch = false;
+
   try {
     await NotificationService.instance.initialize();
     await NotificationPermission.request();
@@ -38,6 +44,15 @@ Future<void> _initializeNotificationsInBackground() async {
     // This is required for notification taps that launch a completely
     // terminated app.
     await FcmService.instance.initialize();
+
+    // At this point both local-notification and FCM launch details
+    // have been checked.
+    notificationLaunch =
+        NotificationNavigationService.instance.hasPendingNavigation;
+
+    NotificationNavigationService.instance.completeStartupCheck(
+      notificationLaunch: notificationLaunch,
+    );
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -48,5 +63,10 @@ Future<void> _initializeNotificationsInBackground() async {
   } catch (e, stack) {
     debugPrint('Failed to initialize/reschedule notifications: $e');
     debugPrintStack(stackTrace: stack);
+
+    // Never leave SplashScreen waiting forever if notification setup fails.
+    NotificationNavigationService.instance.completeStartupCheck(
+      notificationLaunch: notificationLaunch,
+    );
   }
 }

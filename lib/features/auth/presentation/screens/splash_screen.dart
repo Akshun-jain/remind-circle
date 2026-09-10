@@ -5,8 +5,8 @@ import 'package:remind_circle/app/theme/colors.dart';
 import 'package:remind_circle/app/theme/spacing.dart';
 import 'package:remind_circle/app/theme/text_styles.dart';
 import 'package:remind_circle/core/constants/app_strings.dart';
-//import 'package:remind_circle/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:remind_circle/features/auth/presentation/screens/auth_gate.dart';
+import 'package:remind_circle/core/notifications/notification_navigation_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,10 +23,20 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
 
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthGate()));
+      _continueFromSplash();
     });
+  }
+
+  Future<void> _continueFromSplash() async {
+    await NotificationNavigationService.instance.waitForStartupCheck();
+
+    if (!mounted) return;
+
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthGate()));
+
+    NotificationNavigationService.instance.retryPendingNavigation();
   }
 
   @override

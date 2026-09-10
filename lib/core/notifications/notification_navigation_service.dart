@@ -1,5 +1,7 @@
 import 'dart:developer' as developer;
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,32 @@ class NotificationNavigationService {
   String? _pendingGroupId;
   bool _handlingNavigation = false;
 
+  bool get hasPendingNavigation => _pendingEventId != null;
+
+  Completer<bool>? _startupCompleter;
+
+  void beginStartupCheck() {
+    _startupCompleter ??= Completer<bool>();
+  }
+
+  Future<bool> waitForStartupCheck() async {
+    final completer = _startupCompleter;
+
+    if (completer != null) {
+      return completer.future;
+    }
+
+    return false;
+  }
+
+  void completeStartupCheck({required bool notificationLaunch}) {
+    final completer = _startupCompleter;
+
+    if (completer != null && !completer.isCompleted) {
+      completer.complete(notificationLaunch);
+    }
+  }
+
   void attachNavigatorKey(GlobalKey<NavigatorState> navigatorKey) {
     _navigatorKey = navigatorKey;
 
@@ -30,6 +58,16 @@ class NotificationNavigationService {
         _tryHandlePendingNavigation();
       });
     }
+  }
+
+  void retryPendingNavigation() {
+    if (_pendingEventId == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _tryHandlePendingNavigation();
+      });
+    });
   }
 
   void handleNotificationTap({required String eventId, String? groupId}) {

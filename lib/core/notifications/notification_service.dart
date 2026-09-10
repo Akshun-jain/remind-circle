@@ -240,22 +240,22 @@ class NotificationService {
       'timezone=${tz.local.name}',
     );
 
-    const androidDetails = AndroidNotificationDetails(
-      'event_channel',
-      'Event Reminders',
-      channelDescription: 'Reminders for upcoming events',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-
-    const details = NotificationDetails(android: androidDetails);
-
     var scheduledCount = 0;
 
     for (final daysBefore in event.notifyBefore) {
       final notificationTime = occurrence.subtract(Duration(days: daysBefore));
 
       final notificationId = _notificationId(event.id, daysBefore);
+
+      const androidDetails = AndroidNotificationDetails(
+        'event_channel',
+        'Event Reminders',
+        channelDescription: 'Reminders for upcoming events',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+
+      const details = NotificationDetails(android: androidDetails);
 
       developer.log(
         'Notifications: preparing schedule '

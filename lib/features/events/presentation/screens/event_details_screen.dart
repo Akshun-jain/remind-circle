@@ -40,27 +40,30 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Event Details')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context),
 
-            const SizedBox(height: 28),
-
-            _buildInfoCard(context),
-
-            const SizedBox(height: 20),
-
-            if (event.notes != null && event.notes!.trim().isNotEmpty)
-              _buildNotesCard(context),
-
-            if (widget.canManageEvent) ...[
               const SizedBox(height: 28),
-              _buildActions(context),
+
+              _buildInfoCard(context),
+
+              const SizedBox(height: 20),
+
+              if (event.notes != null && event.notes!.trim().isNotEmpty)
+                _buildNotesCard(context),
+
+              if (widget.canManageEvent) ...[
+                const SizedBox(height: 28),
+                _buildActions(context),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
