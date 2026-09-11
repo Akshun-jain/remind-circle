@@ -60,6 +60,12 @@ class NotificationService {
           );
         },
       );
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+
+      await androidPlugin?.requestExactAlarmsPermission();
 
       // Handle a local notification that launched the app from a
       // completely terminated state.
@@ -281,7 +287,7 @@ class NotificationService {
           _notificationBody(event, daysBefore, groupName: groupName),
           notificationTime,
           details,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           payload: event.id,
         );
 

@@ -140,12 +140,41 @@ class GroupDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final liveGroupAsync = ref.watch(groupProvider(group.id));
+
+    ref.listen<AsyncValue<Group?>>(groupProvider(group.id), (previous, next) {
+      if (!context.mounted) return;
+
+      // The owner already handles navigation after deleting the group.
+      // Only members need automatic navigation when the group disappears.
+      final currentUid = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUid == group.ownerId) return;
+
+      if (next.hasError) {
+        final error = next.error;
+
+        // The group may have been deleted or access may have been revoked.
+        // Return the user to the Dashboard instead of showing a raw
+        // Firestore permission error.
+        if (error != null) {
+          Navigator.of(context).pop();
+        }
+        return;
+      }
+
+      if (next.hasValue && next.value == null) {
+        Navigator.of(context).pop();
+      }
+    });
+
     return liveGroupAsync.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
 
-      error: (error, stackTrace) =>
-          Scaffold(body: Center(child: Text(error.toString()))),
+      error: (error, stackTrace) {
+        // Normally the listener above will navigate away before this
+        // state is displayed. Keep a neutral fallback for safety.
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      },
 
       data: (liveGroup) {
         if (liveGroup == null) {
